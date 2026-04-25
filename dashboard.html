@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tableau de bord — DÉKOD-IA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<header class="dash-header">
+  <div class="dash-logo">DÉKOD<span>-IA</span></div>
+  <div class="dash-user">
+    <span id="user-prenom"></span>
+    <button class="dash-signout" onclick="signOut()">
+      <i data-lucide="log-out"></i> Déconnexion
+    </button>
+  </div>
+</header>
+
+<main class="dash-main page-enter">
+
+  <!-- Bloc progression -->
+  <div class="progress-card skeleton" id="progress-card" style="min-height:160px"></div>
+
+  <!-- Accordéon parties -->
+  <p class="parties-title">Contenu du guide</p>
+  <div id="parties-container">
+    <div class="skeleton skeleton-partie"></div>
+    <div class="skeleton skeleton-partie"></div>
+    <div class="skeleton skeleton-partie"></div>
+    <div class="skeleton skeleton-partie"></div>
+    <div class="skeleton skeleton-partie"></div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/acces.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

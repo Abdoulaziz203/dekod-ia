@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription — DÉKOD-IA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+<div class="auth-page page-enter">
+  <div class="auth-logo">DÉKOD<span>-IA</span></div>
+
+  <div class="auth-card skeleton" id="auth-card">
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  (async () => {
+    await redirectIfLoggedIn();
+
+    const card = document.getElementById('auth-card');
+    card.classList.remove('skeleton');
+    card.innerHTML = `
+      <h1>Créer mon compte</h1>
+      <p class="auth-subtitle">Accède immédiatement aux 23 chapitres du guide.</p>
+      <form id="signup-form">
+        <div class="form-group">
+          <label for="prenom">Prénom</label>
+          <input type="text" id="prenom" placeholder="Ton prénom" required autocomplete="given-name">
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="ton@email.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="password">Mot de passe</label>
+          <input type="password" id="password" placeholder="8 caractères minimum" required minlength="8" autocomplete="new-password">
+        </div>
+        <!-- PHASE PAIEMENT -->
+        <!-- <div class="payment-recap">...</div> -->
+        <button type="submit" class="auth-submit" id="submit-btn">Créer mon compte et accéder gratuitement</button>
+      </form>
+      <p class="auth-link">Tu as déjà un compte ? <a href="connexion.html">Se connecter</a></p>
+    `;
+
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Création du compte…';
+      try {
+        await signUp(
+          document.getElementById('prenom').value.trim(),
+          document.getElementById('email').value.trim(),
+          document.getElementById('password').value
+        );
+        toast('Compte créé ! Vérifie ton email pour confirmer.', 'success');
+        setTimeout(() => { window.location.href = 'connexion.html'; }, 2500);
+      } catch (err) {
+        toast(err.message || 'Erreur lors de la création du compte.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Créer mon compte et accéder gratuitement';
+      }
+    });
+  })();
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

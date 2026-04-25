@@ -1,0 +1,42 @@
+async function getSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  return session;
+}
+
+async function getRoleRedirect(userId) {
+  const { data: profile } = await sb.from('profiles').select('role').eq('id', userId).single();
+  const role = profile?.role || 'lecteur';
+  if (role === 'admin')      return 'admin.html';
+  if (role === 'partenaire') return 'partenaire-dashboard.html';
+  return 'dashboard.html';
+}
+
+async function signUp(prenom, email, password) {
+  const { data, error } = await sb.auth.signUp({
+    email,
+    password,
+    options: { data: { prenom } }
+  });
+  if (error) throw error;
+  return data;
+}
+
+async function signIn(email, password) {
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  return data;
+}
+
+async function signOut() {
+  const { error } = await sb.auth.signOut();
+  if (error) throw error;
+  window.location.href = 'connexion.html';
+}
+
+async function redirectIfLoggedIn() {
+  const session = await getSession();
+  if (session) {
+    const dest = await getRoleRedirect(session.user.id);
+    window.location.href = dest;
+  }
+}

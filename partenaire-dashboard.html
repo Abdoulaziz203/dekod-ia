@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Partenaire — DÉKOD-IA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/partenaire.css">
+</head>
+<body class="page-enter">
+
+<!-- HEADER -->
+<header class="part-header">
+  <div style="display:flex;align-items:center;gap:0;">
+    <span class="part-logo">DÉKOD<span>-IA</span></span>
+    <span class="part-badge">Partenaire</span>
+  </div>
+  <a href="#" class="part-signout" id="signout-btn">
+    <i data-lucide="log-out"></i>
+    Déconnexion
+  </a>
+</header>
+
+<!-- MAIN -->
+<main class="part-main">
+
+  <!-- Code promo -->
+  <div class="code-card skeleton" id="code-card"></div>
+
+  <!-- Stats -->
+  <div class="part-stats" id="stats-grid">
+    <div class="part-stat skeleton"></div>
+    <div class="part-stat skeleton"></div>
+    <div class="part-stat skeleton"></div>
+    <div class="part-stat skeleton"></div>
+  </div>
+
+  <!-- Lien d'affiliation -->
+  <div class="code-card skeleton" id="link-card" style="margin-bottom:32px;padding:24px 36px;text-align:left;"></div>
+
+  <!-- Tableau des ventes -->
+  <div class="ventes-wrap skeleton" id="ventes-wrap" style="min-height:160px;"></div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/partenaire.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

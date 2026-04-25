@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administration — DÉKOD-IA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<header class="admin-header">
+  <div class="admin-logo">
+    DÉKOD<span>-IA</span>
+    <span class="admin-badge">Admin</span>
+  </div>
+  <button class="admin-signout" onclick="signOut()">
+    <i data-lucide="log-out"></i> Déconnexion
+  </button>
+</header>
+
+<main class="admin-main page-enter">
+
+  <!-- Stats -->
+  <div class="stats-grid" id="stats-grid">
+    <div class="stat-card skeleton"></div>
+    <div class="stat-card skeleton"></div>
+    <div class="stat-card skeleton"></div>
+    <div class="stat-card skeleton"></div>
+  </div>
+
+  <!-- Utilisateurs -->
+  <div class="section-header">
+    <p class="section-title">Utilisateurs</p>
+    <div class="search-box">
+      <span class="search-icon"><i data-lucide="search"></i></span>
+      <input type="text" id="search-input" placeholder="Rechercher par email ou prénom…">
+    </div>
+  </div>
+
+  <div class="users-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Prénom</th>
+          <th>Email</th>
+          <th>Inscription</th>
+          <th>Chapitres lus</th>
+          <th>Progression</th>
+          <th>Statut</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="users-tbody">
+        <tr class="table-skeleton-row">
+          <td><div class="skeleton skeleton-cell"></div></td>
+          <td><div class="skeleton skeleton-cell"></div></td>
+          <td><div class="skeleton skeleton-cell short"></div></td>
+          <td><div class="skeleton skeleton-cell tiny"></div></td>
+          <td><div class="skeleton skeleton-cell short"></div></td>
+          <td><div class="skeleton skeleton-cell tiny"></div></td>
+          <td><div class="skeleton skeleton-cell tiny"></div></td>
+        </tr>
+        <tr class="table-skeleton-row">
+          <td><div class="skeleton skeleton-cell"></div></td>
+          <td><div class="skeleton skeleton-cell"></div></td>
+          <td><div class="skeleton skeleton-cell short"></div></td>
+          <td><div class="skeleton skeleton-cell tiny"></div></td>
+          <td><div class="skeleton skeleton-cell short"></div></td>
+          <td><div class="skeleton skeleton-cell tiny"></div></td>
+          <td><div class="skeleton skeleton-cell tiny"></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Partenaires -->
+  <div class="section-header">
+    <p class="section-title">Partenaires</p>
+  </div>
+  <div class="partenaires-empty">
+    <i data-lucide="users-round"></i>
+    Le programme partenaires n'est pas encore actif.<br>
+    Les données apparaîtront ici au lancement.
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+<script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Environnement
+.env
+.env.local
+.env.*.local
+
+# Node
+node_modules/
+
+# Fichiers de travail internes (ne pas publier sur GitHub)
+.claude/
+prompts-chapitres/
+
+# Systèmes
+.DS_Store
+Thumbs.db
+*.log

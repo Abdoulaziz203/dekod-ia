@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lire — DÉKOD-IA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/lecteur.css">
+</head>
+<body>
+
+<!-- HEADER FIXE -->
+<header class="lecteur-header">
+  <a href="dashboard.html" class="lecteur-back">
+    <i data-lucide="arrow-left"></i> Tableau de bord
+  </a>
+  <div class="lecteur-logo">DÉKOD<span>-IA</span></div>
+  <div class="lecteur-progress">
+    <button class="btn-sommaire" id="btn-sommaire">
+      <i data-lucide="list"></i> Sommaire
+    </button>
+    <span class="lecteur-progress-label" id="progress-label">0/23</span>
+    <div class="lecteur-progress-bar">
+      <div class="lecteur-progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+</header>
+
+<!-- SIDEBAR DESKTOP -->
+<div class="lecteur-body page-enter">
+  <aside class="lecteur-sidebar">
+    <div class="sidebar-title">Sommaire</div>
+    <div id="sidebar-inner"></div>
+  </aside>
+
+  <!-- CONTENU -->
+  <main class="lecteur-content">
+    <div id="chapitre-content">
+      <div class="skeleton content-skeleton-meta"></div>
+      <div class="skeleton content-skeleton-titre"></div>
+      <div class="skeleton content-skeleton-line"></div>
+      <div class="skeleton content-skeleton-line"></div>
+      <div class="skeleton content-skeleton-line short"></div>
+      <div class="skeleton content-skeleton-line"></div>
+      <div class="skeleton content-skeleton-line"></div>
+      <div class="skeleton content-skeleton-line short"></div>
+    </div>
+  </main>
+</div>
+
+<!-- FOOTER NAVIGATION -->
+<footer class="lecteur-footer">
+  <button class="nav-btn" id="btn-prev" disabled>
+    <i data-lucide="arrow-left"></i> Précédent
+  </button>
+  <button class="nav-marquer" id="btn-marquer">
+    <i data-lucide="circle"></i><span>Marquer comme lu</span>
+  </button>
+  <button class="nav-btn nav-btn-next" id="btn-next" data-next-id="">
+    Suivant <i data-lucide="arrow-right"></i>
+  </button>
+</footer>
+
+<!-- MOBILE SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="sidebar-mobile" id="sidebar-mobile">
+  <div class="sidebar-mobile-close">
+    <span class="sidebar-title" style="padding:0;border:none">Sommaire</span>
+    <button id="sidebar-mobile-close" style="background:none;border:none;cursor:pointer;color:var(--color-text-muted)">
+      <i data-lucide="x"></i>
+    </button>
+  </div>
+  <div id="sidebar-mobile-inner"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/acces.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+<script src="js/lecteur.js"></script>
+</body>
+</html>
