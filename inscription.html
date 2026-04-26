@@ -23,10 +23,6 @@
 <script src="js/utils.js"></script>
 <script src="js/auth.js"></script>
 <script>
-  const MF_ENDPOINT = 'https://pay.moneyfusion.net/D_KOD_IA/50fc818912ba9729/pay/';
-  const RETURN_URL  = 'https://dekod-ia.netlify.app/paiement-retour.html';
-  const WEBHOOK_URL = 'https://dekod-ia.netlify.app/.netlify/functions/webhook-paiement';
-
   (async () => {
     await redirectIfLoggedIn();
 
@@ -35,12 +31,6 @@
     card.innerHTML = `
       <h1>Créer mon compte</h1>
       <p class="auth-subtitle">Accède immédiatement aux 23 chapitres du guide.</p>
-
-      <div class="payment-recap">
-        <div class="payment-recap-label">Guide DÉKOD-IA</div>
-        <div class="payment-recap-price">12 000 <span>XOF</span></div>
-        <div class="payment-recap-desc">Accès permanent · Wave · Orange Money · MTN · Carte</div>
-      </div>
 
       <form id="signup-form">
         <div class="form-group">
@@ -52,15 +42,11 @@
           <input type="email" id="email" placeholder="ton@email.com" required autocomplete="email">
         </div>
         <div class="form-group">
-          <label for="telephone">Téléphone <span class="label-hint">(ex: +221XXXXXXXXX)</span></label>
-          <input type="tel" id="telephone" placeholder="+221 77 000 00 00" required autocomplete="tel">
-        </div>
-        <div class="form-group">
           <label for="password">Mot de passe</label>
           <input type="password" id="password" placeholder="8 caractères minimum" required minlength="8" autocomplete="new-password">
         </div>
         <button type="submit" class="auth-submit" id="submit-btn">
-          Créer mon compte et payer 12 000 XOF
+          Créer mon compte
         </button>
       </form>
       <p class="auth-link">Tu as déjà un compte ? <a href="connexion.html">Se connecter</a></p>
@@ -68,69 +54,29 @@
 
     document.getElementById('signup-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn     = document.getElementById('submit-btn');
-      const prenom  = document.getElementById('prenom').value.trim();
-      const email   = document.getElementById('email').value.trim();
-      const tel     = document.getElementById('telephone').value.trim();
-      const pwd     = document.getElementById('password').value;
+      const btn    = document.getElementById('submit-btn');
+      const prenom = document.getElementById('prenom').value.trim();
+      const email  = document.getElementById('email').value.trim();
+      const pwd    = document.getElementById('password').value;
 
       btn.disabled = true;
-      btn.textContent = 'Création du compte…';
+      btn.textContent = 'Création en cours…';
 
-      // Étape 1 — Créer le compte côté serveur
-      let paiementId, prenomRetour, emailRetour, telRetour;
       try {
-        const res = await fetch('/api/creer-compte', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prenom, email, password: pwd, telephone: tel })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          toast(data.error || 'Erreur lors de la création du compte.', 'error');
-          btn.disabled = false;
-          btn.textContent = 'Créer mon compte et payer 12 000 XOF';
-          return;
-        }
-        paiementId   = data.paiementId;
-        prenomRetour = data.prenom;
-        emailRetour  = data.email;
-        telRetour    = data.telephone;
-      } catch {
-        toast('Erreur réseau. Vérifie ta connexion.', 'error');
-        btn.disabled = false;
-        btn.textContent = 'Créer mon compte et payer 12 000 XOF';
-        return;
-      }
-
-      // Étape 2 — Initier le paiement MoneyFusion depuis le navigateur
-      btn.textContent = 'Redirection vers le paiement…';
-      try {
-        const res = await fetch(MF_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            totalPrice: 12000,
-            article: [{ name: 'DÉKOD-IA — Guide SaaS Claude Code', amount: 12000 }],
-            personal_Info: [{ paiementId }],
-            numeroSend: telRetour,
-            nomclient: prenomRetour,
-            return_url: RETURN_URL,
-            webhook_url: WEBHOOK_URL
-          })
-        });
-        const mf = await res.json();
-        if (mf.statut && mf.url) {
-          window.location.href = mf.url;
+        await signUp(prenom, email, pwd);
+        await signIn(email, pwd);
+        const { data: { session } } = await sb.auth.getSession();
+        const dest = await getRoleRedirect(session.user.id);
+        window.location.href = dest;
+      } catch (err) {
+        const msg = err.message?.toLowerCase() || '';
+        if (msg.includes('already') || msg.includes('registered')) {
+          toast('Cet email est déjà utilisé. Connecte-toi.', 'error');
         } else {
-          toast('Erreur lors de l\'initiation du paiement. Réessaie.', 'error');
-          btn.disabled = false;
-          btn.textContent = 'Créer mon compte et payer 12 000 XOF';
+          toast(err.message || 'Erreur lors de la création du compte.', 'error');
         }
-      } catch {
-        toast('Impossible de contacter MoneyFusion. Réessaie.', 'error');
         btn.disabled = false;
-        btn.textContent = 'Créer mon compte et payer 12 000 XOF';
+        btn.textContent = 'Créer mon compte';
       }
     });
   })();
