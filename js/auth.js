@@ -4,7 +4,15 @@ async function getSession() {
 }
 
 async function getRoleRedirect(userId) {
-  const { data: profile } = await sb.from('profiles').select('role').eq('id', userId).single();
+  const { data: profile } = await sb.from('profiles').select('role, suspendu').eq('id', userId).single();
+
+  if (profile?.suspendu) {
+    await sb.auth.signOut();
+    const err = new Error('Compte suspendu. Contacte le support.');
+    err.code = 'SUSPENDED';
+    throw err;
+  }
+
   const role = profile?.role || 'lecteur';
   if (role === 'admin')      return 'admin.html';
   if (role === 'partenaire') return 'partenaire-dashboard.html';
@@ -46,7 +54,13 @@ async function signOut() {
 async function redirectIfLoggedIn() {
   const session = await getSession();
   if (session) {
-    const dest = await getRoleRedirect(session.user.id);
-    window.location.href = dest;
+    try {
+      const dest = await getRoleRedirect(session.user.id);
+      window.location.href = dest;
+    } catch (err) {
+      if (err.code === 'SUSPENDED') {
+        toast('Compte suspendu. Contacte le support.', 'error');
+      }
+    }
   }
 }

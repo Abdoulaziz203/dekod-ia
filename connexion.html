@@ -59,7 +59,11 @@
         const dest = await getRoleRedirect(data.user.id);
         window.location.href = dest;
       } catch (err) {
-        toast(err.message || 'Erreur de connexion.', 'error');
+        if (err.code === 'SUSPENDED') {
+          toast('Compte suspendu. Contacte le support.', 'error');
+        } else {
+          toast(err.message || 'Erreur de connexion.', 'error');
+        }
         btn.disabled = false;
         btn.textContent = 'Se connecter';
       }

@@ -32,6 +32,64 @@
     <div class="stat-card skeleton"></div>
   </div>
 
+  <!-- Prix & Configuration -->
+  <div class="section-header">
+    <p class="section-title">Prix & Configuration</p>
+  </div>
+
+  <div class="config-card">
+    <div class="config-row">
+      <div class="config-field">
+        <label for="config-prix">Prix de la clé d'accès (FCFA)</label>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input type="number" id="config-prix" min="0" placeholder="0" class="config-input">
+          <button id="btn-save-config" class="btn-config-save" onclick="saveConfig()">Sauvegarder</button>
+        </div>
+        <span id="gratuit-label" class="config-note">Liens partenaires actifs</span>
+      </div>
+      <div class="config-field" style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="config-gratuit" disabled style="width:16px;height:16px;accent-color:var(--color-red)">
+        <label for="config-gratuit" style="font-size:13px;color:var(--color-text-muted)">Mode gratuit (auto si prix = 0)</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clés d'activation -->
+  <div class="section-header">
+    <p class="section-title">Clés d'activation</p>
+    <div class="cles-gen-row">
+      <input type="number" id="cles-qty" min="1" max="100" placeholder="Quantité" class="config-input" style="width:120px">
+      <button id="btn-generer-cles" class="btn-config-save" onclick="genererCles()">
+        <i data-lucide="plus"></i> Générer
+      </button>
+    </div>
+  </div>
+
+  <div class="users-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Clé (masquée)</th>
+          <th>Statut</th>
+          <th>Utilisée par</th>
+          <th>Date activation</th>
+          <th>Prix payé</th>
+        </tr>
+      </thead>
+      <tbody id="cles-tbody">
+        <tr class="table-skeleton-row">
+          <td><div class="skeleton skeleton-cell tiny"></div></td>
+          <td><div class="skeleton skeleton-cell"></div></td>
+          <td><div class="skeleton skeleton-cell short"></div></td>
+          <td><div class="skeleton skeleton-cell"></div></td>
+          <td><div class="skeleton skeleton-cell short"></div></td>
+          <td><div class="skeleton skeleton-cell short"></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
   <!-- Utilisateurs -->
   <div class="section-header">
     <p class="section-title">Utilisateurs</p>
@@ -51,7 +109,7 @@
           <th>Chapitres lus</th>
           <th>Progression</th>
           <th>Statut</th>
-          <th>Action</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody id="users-tbody">
@@ -85,6 +143,7 @@
           <th>Inscription</th>
           <th>Statut</th>
           <th>Actions</th>
+          <th>Activité</th>
         </tr>
       </thead>
       <tbody id="partenaires-tbody">
@@ -95,6 +154,7 @@
           <td><div class="skeleton skeleton-cell tiny"></div></td>
           <td><div class="skeleton skeleton-cell short"></div></td>
           <td><div class="skeleton skeleton-cell short"></div></td>
+          <td><div class="skeleton skeleton-cell tiny"></div></td>
           <td><div class="skeleton skeleton-cell tiny"></div></td>
           <td><div class="skeleton skeleton-cell tiny"></div></td>
         </tr>

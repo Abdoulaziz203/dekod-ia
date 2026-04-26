@@ -19,6 +19,10 @@ exports.handler = async (event) => {
 
   const codeUpper = code.trim().toUpperCase();
 
+  // Si le mode gratuit est actif, les liens d'affiliation sont désactivés
+  const { data: configRow } = await sb.from('config').select('est_gratuit').limit(1).single();
+  if (configRow?.est_gratuit) return { statusCode: 200, body: JSON.stringify({ ok: false, reason: 'gratuit' }) };
+
   // Vérifier que le code appartient à un partenaire validé
   const { data: part } = await sb
     .from('partenaires')
