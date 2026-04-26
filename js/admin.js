@@ -73,7 +73,7 @@ function renderStats(inscrits, payants, progMoy, enAttente) {
 
 async function loadUsers() {
   const { data: profiles } = await sb.from('profiles')
-    .select('id, prenom, email, role, created_at, ref_code, suspendu')
+    .select('id, prenom, email, role, created_at, ref_code')
     .order('created_at', { ascending: false });
   const { data: accesRows } = await sb.from('acces').select('user_id, type, actif');
   const { data: progRows }  = await sb.from('progression').select('user_id').eq('lu', true);
@@ -101,7 +101,7 @@ function renderUsers(users) {
     return;
   }
   tbody.innerHTML = users.map(u => `
-    <tr class="${u.suspendu ? 'row-suspended' : ''}">
+    <tr>
       <td class="name">${u.prenom || '—'}</td>
       <td class="muted">
         ${u.email || '—'}
@@ -116,59 +116,34 @@ function renderUsers(users) {
         </div>
       </td>
       <td>
-        ${u.suspendu
-          ? '<span class="badge-actif badge-revoke"><i data-lucide="slash"></i> Suspendu</span>'
-          : u.acces?.actif
-            ? '<span class="badge-actif"><i data-lucide="check-circle"></i> Actif</span>'
-            : '<span class="badge-actif badge-revoke"><i data-lucide="x-circle"></i> Inactif</span>'}
+        ${u.acces?.actif
+          ? '<span class="badge-actif"><i data-lucide="check-circle"></i> Actif</span>'
+          : u.acces
+            ? '<span class="badge-actif badge-revoke"><i data-lucide="x-circle"></i> Inactif</span>'
+            : '<span class="badge-actif badge-revoke" style="opacity:0.5"><i data-lucide="minus-circle"></i> Sans accès</span>'}
       </td>
-      <td style="display:flex;gap:6px;flex-wrap:wrap;">
-        ${u.role !== 'admin'
-          ? u.suspendu
-            ? `<button class="btn-validate" onclick="reactiverUser('${u.id}')"><i data-lucide="check"></i> Réactiver</button>`
-            : `<button class="btn-revoke" onclick="suspendreUser('${u.id}')"><i data-lucide="slash"></i> Suspendre</button>`
+      <td>
+        ${u.role !== 'admin' && u.acces
+          ? u.acces.actif
+            ? `<button class="btn-revoke" onclick="setAccesActif('${u.id}', false)"><i data-lucide="x-circle"></i> Désactiver</button>`
+            : `<button class="btn-validate" onclick="setAccesActif('${u.id}', true)"><i data-lucide="check-circle"></i> Activer</button>`
           : '—'}
-        ${!u.suspendu && u.acces?.actif
-          ? `<button class="btn-revoke" onclick="revoquerAcces('${u.id}')"><i data-lucide="ban"></i> Révoquer</button>`
-          : ''}
       </td>
     </tr>
   `).join('');
   lucide.createIcons();
 }
 
-async function suspendreUser(userId) {
-  if (!confirm('Suspendre ce compte ? L\'utilisateur ne pourra plus se connecter.')) return;
-  const { error } = await sb.from('profiles').update({ suspendu: true }).eq('id', userId);
+async function setAccesActif(userId, actif) {
+  const action = actif ? 'activer' : 'désactiver';
+  if (!confirm(`Voulez-vous ${action} l'accès de cet utilisateur ?`)) return;
+  const { error } = await sb.from('acces').update({ actif }).eq('user_id', userId);
   if (!error) {
-    toast('Compte suspendu.', 'success');
-    allUsers = allUsers.map(u => u.id === userId ? { ...u, suspendu: true } : u);
+    toast(actif ? 'Accès activé.' : 'Accès désactivé.', 'success');
+    allUsers = allUsers.map(u => u.id === userId ? { ...u, acces: { ...u.acces, actif } } : u);
     renderUsers(allUsers);
   } else {
-    toast('Erreur lors de la suspension.', 'error');
-  }
-}
-
-async function reactiverUser(userId) {
-  const { error } = await sb.from('profiles').update({ suspendu: false }).eq('id', userId);
-  if (!error) {
-    toast('Compte réactivé.', 'success');
-    allUsers = allUsers.map(u => u.id === userId ? { ...u, suspendu: false } : u);
-    renderUsers(allUsers);
-  } else {
-    toast('Erreur lors de la réactivation.', 'error');
-  }
-}
-
-async function revoquerAcces(userId) {
-  if (!confirm('Révoquer l\'accès de cet utilisateur ?')) return;
-  const { error } = await sb.from('acces').update({ actif: false }).eq('user_id', userId);
-  if (!error) {
-    toast('Accès révoqué.', 'success');
-    allUsers = allUsers.map(u => u.id === userId ? { ...u, acces: { ...u.acces, actif: false } } : u);
-    renderUsers(allUsers);
-  } else {
-    toast('Erreur lors de la révocation.', 'error');
+    toast('Erreur lors de la mise à jour.', 'error');
   }
 }
 
@@ -191,13 +166,6 @@ async function loadCles() {
   renderCles(cles || []);
 }
 
-function maskKey(code) {
-  const parts = code.split('-');
-  if (parts.length < 2) return code.slice(0, -4) + '****';
-  parts[parts.length - 1] = '****';
-  return parts.join('-');
-}
-
 function renderCles(cles) {
   const tbody = document.getElementById('cles-tbody');
   if (!tbody) return;
@@ -207,10 +175,18 @@ function renderCles(cles) {
     return;
   }
 
-  tbody.innerHTML = cles.map(c => `
-    <tr>
+  tbody.innerHTML = cles.map(c => {
+    const masked = maskKey(c.code);
+    return `<tr>
       <td class="muted" style="font-family:monospace">#${String(c.numero_interne).padStart(3, '0')}</td>
-      <td><code style="font-family:monospace;font-size:12px;color:var(--color-text-soft)">${maskKey(c.code)}</code></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <code style="font-family:monospace;font-size:12px;color:var(--color-text-soft)">${masked}</code>
+          ${c.statut === 'unused'
+            ? `<button class="btn-copy-key" title="Copier la clé" onclick="copierCle('${c.code}', this)"><i data-lucide="copy"></i></button>`
+            : ''}
+        </div>
+      </td>
       <td>${c.statut === 'unused'
         ? '<span class="badge-actif"><i data-lucide="circle"></i> Disponible</span>'
         : '<span class="badge-actif badge-revoke"><i data-lucide="check-circle"></i> Utilisée</span>'}
@@ -218,9 +194,29 @@ function renderCles(cles) {
       <td class="muted">${c.utilise_par || '—'}</td>
       <td class="muted">${c.active_at ? formatDate(c.active_at) : '—'}</td>
       <td class="muted">${c.prix_achat > 0 ? c.prix_achat + ' FCFA' : '—'}</td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
   lucide.createIcons();
+}
+
+function maskKey(code) {
+  const parts = code.split('-');
+  if (parts.length < 2) return code.slice(0, -4) + '****';
+  const copy = [...parts];
+  copy[copy.length - 1] = '****';
+  return copy.join('-');
+}
+
+function copierCle(code, btn) {
+  navigator.clipboard.writeText(code).then(() => {
+    toast('Clé copiée !', 'success');
+    btn.innerHTML = '<i data-lucide="check"></i>';
+    lucide.createIcons();
+    setTimeout(() => {
+      btn.innerHTML = '<i data-lucide="copy"></i>';
+      lucide.createIcons();
+    }, 2000);
+  });
 }
 
 function generateKeyCode() {
@@ -253,7 +249,8 @@ async function genererCles() {
   }
 
   btn.disabled = false;
-  btn.textContent = 'Générer';
+  btn.innerHTML = '<i data-lucide="plus"></i> Générer';
+  lucide.createIcons();
 }
 
 // ── Prix & Config ─────────────────────────────────────────────────────────────
@@ -331,7 +328,7 @@ function renderPartenaires(parts) {
   };
 
   tbody.innerHTML = parts.map(p => `
-    <tr id="part-row-${p.id}">
+    <tr>
       <td class="name">${p.nom || '—'}</td>
       <td class="muted">${p.email || '—'}</td>
       <td class="muted">${p.telephone || '—'}</td>
@@ -344,39 +341,38 @@ function renderPartenaires(parts) {
         ${p.statut !== 'rejeté' ? `<button class="btn-revoke"   onclick="rejeterPartenaire('${p.id}')"><i data-lucide="x"></i> Rejeter</button>` : ''}
       </td>
       <td>
-        <button class="btn-activite" onclick="toggleActivite('${p.id}', '${p.code_partenaire || ''}', this)">
-          <i data-lucide="bar-chart-2"></i> Voir activité
+        <button class="btn-activite" onclick="ouvrirModalActivite('${p.id}', '${p.code_partenaire || ''}', '${(p.nom || '').replace(/'/g, "\\'")}')">
+          <i data-lucide="bar-chart-2"></i> Activité
         </button>
-      </td>
-    </tr>
-    <tr id="activite-${p.id}" class="activite-panel" style="display:none">
-      <td colspan="9" class="activite-cell">
-        <div class="activite-loading"><i data-lucide="loader"></i> Chargement…</div>
       </td>
     </tr>
   `).join('');
   lucide.createIcons();
 }
 
-async function toggleActivite(partId, code, btn) {
-  const row = document.getElementById(`activite-${partId}`);
-  if (!row) return;
+// ── Modal Activité ────────────────────────────────────────────────────────────
 
-  if (row.style.display !== 'none') {
-    row.style.display = 'none';
-    btn.innerHTML = '<i data-lucide="bar-chart-2"></i> Voir activité';
-    lucide.createIcons();
-    return;
-  }
+function ouvrirModalActivite(partId, code, nom) {
+  const modal = document.getElementById('activite-modal');
+  const title = document.getElementById('modal-title');
+  const body  = document.getElementById('modal-body');
 
-  row.style.display = 'table-row';
-  btn.innerHTML = '<i data-lucide="chevron-up"></i> Masquer';
+  title.textContent = `Activité — ${nom}`;
+  body.innerHTML = `<div class="activite-loading"><i data-lucide="loader"></i> Chargement…</div>`;
   lucide.createIcons();
 
-  await chargerActivite(partId, code, row.querySelector('.activite-cell'));
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  chargerActivite(partId, code, body);
 }
 
-async function chargerActivite(partId, code, cell) {
+function fermerModal() {
+  document.getElementById('activite-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+async function chargerActivite(partId, code, container) {
   const [
     { count: nbVisiteurs },
     { data: inscrits },
@@ -395,7 +391,7 @@ async function chargerActivite(partId, code, cell) {
   const totalComm = commList.reduce((s, c) => s + (c.montant_commission || 0), 0);
   const totalPaye = commList.filter(c => c.statut === 'payé').reduce((s, c) => s + (c.montant_commission || 0), 0);
 
-  cell.innerHTML = `
+  container.innerHTML = `
     <div class="activite-stats">
       <div class="activite-stat"><span class="activite-stat-val">${nbVisiteurs || 0}</span><span class="activite-stat-lbl">Visiteurs</span></div>
       <div class="activite-stat"><span class="activite-stat-val">${inscritsList.length}</span><span class="activite-stat-lbl">Inscrits</span></div>
@@ -406,9 +402,7 @@ async function chargerActivite(partId, code, cell) {
     ${commList.length > 0 ? `
       <table class="activite-table">
         <thead>
-          <tr>
-            <th>Nom</th><th>Email</th><th>Prix payé</th><th>Commission (35%)</th><th>Statut</th><th>Action</th>
-          </tr>
+          <tr><th>Nom</th><th>Email</th><th>Prix</th><th>Commission</th><th>Statut</th><th>Action</th></tr>
         </thead>
         <tbody>
           ${commList.map(c => {
@@ -417,13 +411,13 @@ async function chargerActivite(partId, code, cell) {
               <td class="name">${user.prenom || '—'}</td>
               <td class="muted">${user.email || '—'}</td>
               <td class="muted">${c.montant_vente} FCFA</td>
-              <td class="muted">${c.montant_commission} FCFA</td>
+              <td class="muted" style="color:#22c55e">${c.montant_commission} FCFA</td>
               <td>${c.statut === 'payé'
-                ? `<span class="badge-actif"><i data-lucide="check-circle"></i> Payé</span>`
-                : `<span class="badge-actif badge-revoke"><i data-lucide="clock"></i> En attente</span>`}
+                ? '<span class="badge-actif"><i data-lucide="check-circle"></i> Payé</span>'
+                : '<span class="badge-actif badge-revoke"><i data-lucide="clock"></i> En attente</span>'}
               </td>
               <td>${c.statut !== 'payé'
-                ? `<button class="btn-validate" onclick="marquerPaye('${c.id}', '${partId}', '${code}', this.closest('td').parentElement.closest('td'))">
+                ? `<button class="btn-validate" onclick="marquerPaye('${c.id}', '${partId}', '${code}', this)">
                      <i data-lucide="check"></i> Marquer payé
                    </button>`
                 : `<span class="muted" style="font-size:11px">${c.paye_le ? formatDate(c.paye_le) : ''}</span>`}
@@ -432,19 +426,20 @@ async function chargerActivite(partId, code, cell) {
           }).join('')}
         </tbody>
       </table>
-    ` : `<p style="color:var(--color-text-muted);font-size:13px;margin-top:12px">Aucun acheteur pour ce partenaire.</p>`}
+    ` : `<p style="color:var(--color-text-muted);font-size:13px;margin-top:12px;">Aucun acheteur pour ce partenaire.</p>`}
   `;
   lucide.createIcons();
 }
 
-async function marquerPaye(commissionId, partId, code, cell) {
+async function marquerPaye(commissionId, partId, code, btn) {
   const { error } = await sb.from('commissions')
     .update({ statut: 'payé', paye_le: new Date().toISOString() })
     .eq('id', commissionId);
 
   if (!error) {
     toast('Commission marquée payée.', 'success');
-    await chargerActivite(partId, code, cell);
+    const body = document.getElementById('modal-body');
+    await chargerActivite(partId, code, body);
   } else {
     toast('Erreur lors de la mise à jour.', 'error');
   }
@@ -471,6 +466,11 @@ async function rejeterPartenaire(id) {
     toast('Erreur lors du rejet.', 'error');
   }
 }
+
+// Fermer modal en cliquant sur le fond
+document.getElementById('activite-modal').addEventListener('click', function(e) {
+  if (e.target === this) fermerModal();
+});
 
 document.getElementById('search-input').addEventListener('input', e => filterUsers(e.target.value));
 
