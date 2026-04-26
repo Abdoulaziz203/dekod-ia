@@ -12,7 +12,6 @@
 </head>
 <body class="page-enter">
 
-<!-- HEADER -->
 <header class="part-header">
   <div style="display:flex;align-items:center;gap:0;">
     <span class="part-logo">DÉKOD<span>-IA</span></span>
@@ -24,26 +23,16 @@
   </a>
 </header>
 
-<!-- MAIN -->
-<main class="part-main">
-
-  <!-- Code promo -->
-  <div class="code-card skeleton" id="code-card"></div>
-
-  <!-- Stats -->
-  <div class="part-stats" id="stats-grid">
+<main class="part-main" id="part-main">
+  <!-- Skeleton chargement initial -->
+  <div class="skeleton" style="min-height:180px;border-radius:10px;margin-bottom:32px;"></div>
+  <div class="part-stats">
     <div class="part-stat skeleton"></div>
     <div class="part-stat skeleton"></div>
     <div class="part-stat skeleton"></div>
     <div class="part-stat skeleton"></div>
   </div>
-
-  <!-- Lien d'affiliation -->
-  <div class="code-card skeleton" id="link-card" style="margin-bottom:32px;padding:24px 36px;text-align:left;"></div>
-
-  <!-- Tableau des ventes -->
-  <div class="ventes-wrap skeleton" id="ventes-wrap" style="min-height:160px;"></div>
-
+  <div class="ventes-wrap skeleton" style="min-height:160px;"></div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>

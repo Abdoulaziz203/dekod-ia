@@ -9,45 +9,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/auth.css">
-  <style>
-    .part-insc-note {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      padding: 16px;
-      margin-top: 20px;
-      font-size: 13px;
-      color: var(--color-text-muted);
-      line-height: 1.6;
-    }
-    .part-insc-note strong { color: var(--color-text-soft); }
-    .commission-badge {
-      display: inline-block;
-      background: rgba(232,0,29,0.12);
-      color: var(--color-red);
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 20px;
-      margin-bottom: 16px;
-      letter-spacing: 0.5px;
-    }
-  </style>
 </head>
 <body>
 
 <div class="auth-page page-enter">
   <div class="auth-logo">DÉKOD<span>-IA</span></div>
-
   <div class="auth-card" id="auth-card">
-    <span class="commission-badge">Programme Partenaire · 20% de commission</span>
+
+    <span style="display:inline-block;background:rgba(232,0,29,0.12);color:var(--color-red);font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;margin-bottom:16px;letter-spacing:0.5px;">
+      Programme Partenaire · 20% de commission
+    </span>
+
     <h1>Rejoins le programme.</h1>
     <p class="auth-subtitle">Partage le guide, gagne une commission sur chaque vente générée.</p>
 
     <form id="part-form">
       <div class="form-group">
-        <label for="prenom">Prénom</label>
-        <input type="text" id="prenom" placeholder="Ton prénom" required autocomplete="given-name">
+        <label for="nom">Nom complet</label>
+        <input type="text" id="nom" placeholder="Ton nom et prénom" required autocomplete="name">
       </div>
       <div class="form-group">
         <label for="email">Email</label>
@@ -57,12 +36,16 @@
         <label for="password">Mot de passe</label>
         <input type="password" id="password" placeholder="8 caractères min." required autocomplete="new-password" minlength="8">
       </div>
-      <button type="submit" class="auth-submit" id="submit-btn">Créer mon compte partenaire</button>
+      <div class="form-group">
+        <label for="telephone">Numéro de téléphone</label>
+        <input type="tel" id="telephone" placeholder="+221 77 000 00 00" required autocomplete="tel">
+      </div>
+      <div class="form-group">
+        <label for="pays">Pays</label>
+        <input type="text" id="pays" placeholder="Ex : Sénégal, Côte d'Ivoire…" required>
+      </div>
+      <button type="submit" class="auth-submit" id="submit-btn">Devenir partenaire</button>
     </form>
-
-    <div class="part-insc-note">
-      🤝 <strong>Comment ça marche :</strong> tu reçois un code promo unique. Quand un lecteur l'utilise à l'achat, tu touches <strong>20% du prix de vente</strong>. Les commissions sont versées chaque mois.
-    </div>
 
     <p class="auth-link">Déjà partenaire ? <a href="connexion.html">Se connecter</a></p>
   </div>
@@ -74,44 +57,59 @@
 <script src="js/auth.js"></script>
 <script>
   (async () => {
-    // Si déjà connecté, rediriger selon le rôle
     await redirectIfLoggedIn();
 
     document.getElementById('part-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = document.getElementById('submit-btn');
-      btn.disabled = true;
-      btn.textContent = 'Création en cours…';
+      const btn       = document.getElementById('submit-btn');
+      const nom       = document.getElementById('nom').value.trim();
+      const email     = document.getElementById('email').value.trim();
+      const password  = document.getElementById('password').value;
+      const telephone = document.getElementById('telephone').value.trim();
+      const pays      = document.getElementById('pays').value.trim();
 
-      const prenom   = document.getElementById('prenom').value.trim();
-      const email    = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
+      btn.disabled = true;
+      btn.textContent = 'Envoi en cours…';
 
       try {
-        // 1. Créer le compte Supabase Auth
-        const { data, error } = await sb.auth.signUp({ email, password });
-        if (error) throw error;
+        const res = await fetch('/api/inscrire-partenaire', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nom, email, password, telephone, pays })
+        });
+        const data = await res.json();
 
-        const userId = data.user.id;
+        if (!res.ok) {
+          toast(data.error || 'Erreur lors de la soumission.', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Devenir partenaire';
+          return;
+        }
 
-        // 2. Générer un code promo unique (6 car. majuscules)
-        const code = 'DK' + Math.random().toString(36).substring(2, 6).toUpperCase();
+        // Remplacer le formulaire par le message de confirmation
+        document.getElementById('auth-card').innerHTML = `
+          <div style="text-align:center;padding:16px 0;">
+            <div style="width:56px;height:56px;border-radius:50%;background:rgba(34,197,94,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+              <i data-lucide="clock" style="width:26px;height:26px;color:#22c55e;"></i>
+            </div>
+            <h1 style="font-size:24px;margin-bottom:12px;">Demande envoyée !</h1>
+            <p style="color:var(--color-text-muted);font-size:14px;line-height:1.7;">
+              Votre demande est en cours de validation.<br>
+              Revenez plus tard ou attendez notre confirmation.<br><br>
+              Vous pouvez dès maintenant vous connecter avec vos identifiants.<br>
+              Votre tableau de bord sera actif une fois votre compte validé.
+            </p>
+            <a href="connexion.html" style="display:inline-block;margin-top:24px;padding:12px 24px;background:var(--color-red);color:var(--color-white);border-radius:6px;font-size:15px;font-weight:600;">
+              Se connecter
+            </a>
+          </div>
+        `;
+        lucide.createIcons();
 
-        // 3. Mettre à jour le profil : rôle partenaire + prénom + code promo
-        const { error: profileError } = await sb
-          .from('profiles')
-          .update({ role: 'partenaire', prenom, code_promo: code })
-          .eq('id', userId);
-
-        if (profileError) throw profileError;
-
-        toast('Compte partenaire créé ! Redirection…', 'success');
-        setTimeout(() => { window.location.href = 'partenaire-dashboard.html'; }, 1200);
-
-      } catch (err) {
-        toast(err.message || 'Erreur lors de la création du compte.', 'error');
+      } catch {
+        toast('Erreur réseau. Vérifie ta connexion.', 'error');
         btn.disabled = false;
-        btn.textContent = 'Créer mon compte partenaire';
+        btn.textContent = 'Devenir partenaire';
       }
     });
   })();

@@ -5,25 +5,23 @@ async function initAdmin() {
   const session = await requireRole('admin');
   if (!session) return;
 
-  await Promise.all([loadStats(), loadUsers()]);
+  await Promise.all([loadStats(), loadUsers(), loadPartenaires()]);
 }
 
 async function loadStats() {
   const [
     { count: totalInscrits },
     { count: totalPayants },
-    { data: progData },
-    { data: chapData }
+    { data: progData }
   ] = await Promise.all([
     sb.from('profiles').select('id', { count: 'exact', head: true }),
     sb.from('acces').select('id', { count: 'exact', head: true }).eq('type', 'paid').eq('actif', true),
-    sb.from('progression').select('user_id, lu').eq('lu', true),
-    sb.from('chapitres').select('id', { count: 'exact', head: true })
+    sb.from('progression').select('user_id, lu').eq('lu', true)
   ]);
 
-  totalChapitres = chapData || 0;
+  const { count: chapCount } = await sb.from('chapitres').select('id', { count: 'exact', head: true });
+  totalChapitres = chapCount || 0;
 
-  // Progression moyenne
   let progMoy = 0;
   if (progData && totalInscrits > 0 && totalChapitres > 0) {
     const byUser = {};
@@ -33,30 +31,15 @@ async function loadStats() {
     progMoy = Math.round((moy / totalChapitres) * 100);
   }
 
-  // Chapitre le plus lu
-  const chapCount = {};
-  (progData || []).forEach(r => {
-    // We don't have chapitre_id here because we didn't select it — use a separate query
-  });
+  const { count: totalPartenaires } = await sb
+    .from('partenaires')
+    .select('id', { count: 'exact', head: true })
+    .eq('statut', 'en_attente');
 
-  const { data: topChap } = await sb.from('progression')
-    .select('chapitre_id, chapitres(titre)')
-    .eq('lu', true)
-    .limit(500);
-
-  let topTitre = '—';
-  if (topChap && topChap.length > 0) {
-    const freq = {};
-    topChap.forEach(r => { freq[r.chapitre_id] = (freq[r.chapitre_id] || 0) + 1; });
-    const topId = Object.entries(freq).sort((a, b) => b[1] - a[1])[0]?.[0];
-    const found = topChap.find(r => r.chapitre_id === topId);
-    topTitre = found?.chapitres?.titre?.slice(0, 28) + '…' || '—';
-  }
-
-  renderStats(totalInscrits || 0, totalPayants || 0, progMoy, topTitre);
+  renderStats(totalInscrits || 0, totalPayants || 0, progMoy, totalPartenaires || 0);
 }
 
-function renderStats(inscrits, payants, progMoy, topChap) {
+function renderStats(inscrits, payants, progMoy, enAttente) {
   const grid = document.getElementById('stats-grid');
   grid.innerHTML = `
     <div class="stat-card">
@@ -65,9 +48,9 @@ function renderStats(inscrits, payants, progMoy, topChap) {
       <div class="stat-sub">comptes créés</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label"><i data-lucide="credit-card"></i> Payants</div>
+      <div class="stat-label"><i data-lucide="key"></i> Clés activées</div>
       <div class="stat-value red">${payants}</div>
-      <div class="stat-sub">accès actifs payants</div>
+      <div class="stat-sub">accès actifs</div>
     </div>
     <div class="stat-card">
       <div class="stat-label"><i data-lucide="trending-up"></i> Progression moy.</div>
@@ -75,9 +58,9 @@ function renderStats(inscrits, payants, progMoy, topChap) {
       <div class="stat-sub">moyenne lecteurs actifs</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label"><i data-lucide="book-open"></i> Chap. + lu</div>
-      <div class="stat-value" style="font-size:18px;padding-top:6px">${topChap}</div>
-      <div class="stat-sub">le plus consulté</div>
+      <div class="stat-label"><i data-lucide="handshake"></i> Partenaires en attente</div>
+      <div class="stat-value ${enAttente > 0 ? 'red' : ''}">${enAttente}</div>
+      <div class="stat-sub">demandes à valider</div>
     </div>
   `;
   lucide.createIcons();
@@ -86,7 +69,7 @@ function renderStats(inscrits, payants, progMoy, topChap) {
 async function loadUsers() {
   const { data: profiles } = await sb.from('profiles').select('id, prenom, email, role, created_at').order('created_at', { ascending: false });
   const { data: accesRows } = await sb.from('acces').select('user_id, type, actif');
-  const { data: progRows } = await sb.from('progression').select('user_id').eq('lu', true);
+  const { data: progRows }  = await sb.from('progression').select('user_id').eq('lu', true);
 
   const accesMap = {};
   (accesRows || []).forEach(r => { accesMap[r.user_id] = r; });
@@ -125,7 +108,7 @@ function renderUsers(users) {
       <td>
         ${u.acces?.actif
           ? '<span class="badge-actif"><i data-lucide="check-circle"></i> Actif</span>'
-          : '<span class="badge-actif badge-revoke"><i data-lucide="x-circle"></i> Révoqué</span>'}
+          : '<span class="badge-actif badge-revoke"><i data-lucide="x-circle"></i> Inactif</span>'}
       </td>
       <td>
         ${u.acces?.actif
@@ -153,6 +136,72 @@ function filterUsers(query) {
   if (!query.trim()) { renderUsers(allUsers); return; }
   const q = query.toLowerCase();
   renderUsers(allUsers.filter(u => (u.email || '').toLowerCase().includes(q) || (u.prenom || '').toLowerCase().includes(q)));
+}
+
+// ── Partenaires ──────────────────────────────────────────────────────────────
+
+async function loadPartenaires() {
+  const { data: parts } = await sb
+    .from('partenaires')
+    .select('id, user_id, nom, email, telephone, pays, statut, code_partenaire, created_at')
+    .order('created_at', { ascending: false });
+
+  renderPartenaires(parts || []);
+}
+
+function renderPartenaires(parts) {
+  const tbody = document.getElementById('partenaires-tbody');
+  if (!tbody) return;
+
+  if (parts.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--color-text-muted);padding:32px">Aucun partenaire pour l'instant.</td></tr>`;
+    return;
+  }
+
+  const badgeStatut = (s) => {
+    if (s === 'en_attente') return '<span class="badge-actif" style="background:rgba(234,179,8,0.12);color:#eab308;"><i data-lucide="clock"></i> En attente</span>';
+    if (s === 'validé')     return '<span class="badge-actif"><i data-lucide="check-circle"></i> Validé</span>';
+    return '<span class="badge-actif badge-revoke"><i data-lucide="x-circle"></i> Rejeté</span>';
+  };
+
+  tbody.innerHTML = parts.map(p => `
+    <tr>
+      <td class="name">${p.nom || '—'}</td>
+      <td class="muted">${p.email || '—'}</td>
+      <td class="muted">${p.telephone || '—'}</td>
+      <td class="muted">${p.pays || '—'}</td>
+      <td><code style="font-family:monospace;font-size:11px;color:var(--color-red)">${p.code_partenaire || '—'}</code></td>
+      <td class="muted">${formatDate(p.created_at)}</td>
+      <td>${badgeStatut(p.statut)}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${p.statut !== 'validé'  ? `<button class="btn-validate" onclick="validerPartenaire('${p.id}')"><i data-lucide="check"></i> Valider</button>` : ''}
+        ${p.statut !== 'rejeté' ? `<button class="btn-revoke"   onclick="rejeterPartenaire('${p.id}')"><i data-lucide="x"></i> Rejeter</button>` : ''}
+      </td>
+    </tr>
+  `).join('');
+  lucide.createIcons();
+}
+
+async function validerPartenaire(id) {
+  const { error } = await sb.from('partenaires').update({ statut: 'validé' }).eq('id', id);
+  if (!error) {
+    toast('Partenaire validé.', 'success');
+    loadPartenaires();
+    loadStats();
+  } else {
+    toast('Erreur lors de la validation.', 'error');
+  }
+}
+
+async function rejeterPartenaire(id) {
+  if (!confirm('Rejeter ce partenaire ?')) return;
+  const { error } = await sb.from('partenaires').update({ statut: 'rejeté' }).eq('id', id);
+  if (!error) {
+    toast('Partenaire rejeté.', 'success');
+    loadPartenaires();
+  } else {
+    toast('Erreur lors du rejet.', 'error');
+  }
 }
 
 document.getElementById('search-input').addEventListener('input', e => filterUsers(e.target.value));

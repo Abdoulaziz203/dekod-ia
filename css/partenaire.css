@@ -165,6 +165,21 @@
 }
 .ventes-empty svg { width: 28px; height: 28px; margin: 0 auto 10px; display: block; opacity: 0.4; }
 
+/* ===== ÉTATS STATUT ===== */
+.status-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 56px 36px;
+  text-align: center;
+  margin-bottom: 32px;
+}
+.status-card svg { width: 44px; height: 44px; margin: 0 auto 20px; display: block; }
+.status-card h2 { font-size: 22px; margin-bottom: 12px; }
+.status-card p { color: var(--color-text-muted); font-size: 14px; line-height: 1.7; }
+.status-card.waiting svg { color: #eab308; }
+.status-card.rejected svg { color: var(--color-red); }
+
 /* ===== INSCRIPTION PARTENAIRE ===== */
 .part-insc-note {
   background: var(--color-surface);
