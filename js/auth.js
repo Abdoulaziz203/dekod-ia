@@ -8,6 +8,16 @@ async function getRoleRedirect(userId) {
   const role = profile?.role || 'lecteur';
   if (role === 'admin')      return 'admin.html';
   if (role === 'partenaire') return 'partenaire-dashboard.html';
+
+  // Vérifier si l'accès est activé (clé valide saisie)
+  const { data: acces } = await sb
+    .from('acces')
+    .select('actif')
+    .eq('user_id', userId)
+    .eq('actif', true)
+    .maybeSingle();
+
+  if (!acces) return 'activation.html';
   return 'dashboard.html';
 }
 

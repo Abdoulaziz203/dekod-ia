@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activation — DÉKOD-IA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+<div class="auth-page page-enter">
+  <div class="auth-logo">DÉKOD<span>-IA</span></div>
+
+  <div class="auth-card skeleton" id="auth-card"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  (async () => {
+    // Pas de session → connexion
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = 'connexion.html'; return; }
+
+    // Accès déjà actif → dashboard
+    const { data: acces } = await sb
+      .from('acces')
+      .select('actif')
+      .eq('user_id', session.user.id)
+      .eq('actif', true)
+      .maybeSingle();
+    if (acces) { window.location.href = 'dashboard.html'; return; }
+
+    const card = document.getElementById('auth-card');
+    card.classList.remove('skeleton');
+    card.innerHTML = `
+      <h1>Active ton accès</h1>
+      <p class="auth-subtitle">Entre ta clé d'activation pour accéder au guide.</p>
+
+      <form id="activation-form">
+        <div class="form-group">
+          <label for="cle">Clé d'activation</label>
+          <input type="text" id="cle" placeholder="DKOD-XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            required autocomplete="off" spellcheck="false" style="font-family: monospace; letter-spacing: 1px;">
+        </div>
+        <button type="submit" class="auth-submit" id="submit-btn">
+          Activer
+        </button>
+      </form>
+
+      <p class="auth-link">
+        Tu n'as pas encore de clé ?
+        <a href="https://opdigi.mychariow.shop/prd_du29cl" target="_blank" rel="noopener">Acheter une clé</a>
+      </p>
+    `;
+
+    document.getElementById('activation-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      const cle = document.getElementById('cle').value.trim();
+
+      btn.disabled = true;
+      btn.textContent = 'Vérification…';
+
+      try {
+        const res = await fetch('/api/activer-cle', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({ code: cle })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          toast(data.error || 'Clé invalide ou déjà utilisée.', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Activer';
+          return;
+        }
+
+        toast('Accès activé ! Bienvenue sur DÉKOD-IA.', 'success');
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+      } catch {
+        toast('Erreur réseau. Vérifie ta connexion.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Activer';
+      }
+    });
+  })();
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>
