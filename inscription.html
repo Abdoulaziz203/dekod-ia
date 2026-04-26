@@ -66,10 +66,11 @@
         await signUp(prenom, email, pwd);
         await signIn(email, pwd);
         const { data: { session } } = await sb.auth.getSession();
-        // Enregistrer le code partenaire si inscription via lien affilié
-        const refCode = new URLSearchParams(window.location.search).get('ref');
+        // Enregistrer le code partenaire (depuis localStorage, posé lors de la visite index)
+        const refCode = localStorage.getItem('dekod_ref');
         if (refCode && session) {
           await sb.from('profiles').update({ ref_code: refCode }).eq('id', session.user.id);
+          localStorage.removeItem('dekod_ref');
         }
         const dest = await getRoleRedirect(session.user.id);
         window.location.href = dest;

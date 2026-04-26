@@ -723,6 +723,30 @@
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script>lucide.createIcons();</script>
 <script>
+  // Tracking lien partenaire — exécuté dès l'arrivée sur la landing page
+  (function () {
+    const ref = new URLSearchParams(window.location.search).get('ref');
+    if (!ref) return;
+
+    const code = ref.trim().toUpperCase();
+    localStorage.setItem('dekod_ref', code);
+
+    // Identifiant visiteur permanent par navigateur
+    let vid = localStorage.getItem('dekod_vid');
+    if (!vid) {
+      vid = 'v' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      localStorage.setItem('dekod_vid', vid);
+    }
+
+    // Appel API (la contrainte UNIQUE en base empêche les doublons)
+    fetch('/api/enregistrer-visite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, visitorId: vid })
+    }).catch(() => {});
+  })();
+</script>
+<script>
   // Scroll reveal — Intersection Observer
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry, i) => {

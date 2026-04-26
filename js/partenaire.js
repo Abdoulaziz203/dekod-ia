@@ -54,19 +54,26 @@
   }
 
   // ── Validé → Dashboard complet ───────────────────────────────────────────────
-  const code     = partenaire.code_partenaire || '—';
-  const lienRef  = `https://dekod-ia.netlify.app/inscription.html?ref=${code}`;
+  const code    = partenaire.code_partenaire || '—';
+  const lienRef = `https://dekod-ia.netlify.app/?ref=${code}`;
 
-  // Charger les filleuls inscrits via ce code
-  const { data: filleuls } = await sb
-    .from('profiles')
-    .select('id, prenom, email, created_at')
-    .eq('ref_code', code)
-    .order('created_at', { ascending: false });
+  // Charger visiteurs, filleuls inscrits et acheteurs en parallèle
+  const [
+    { count: nbVisiteurs },
+    { data: filleuls }
+  ] = await Promise.all([
+    sb.from('visiteurs')
+      .select('id', { count: 'exact', head: true })
+      .eq('code_partenaire', code),
+    sb.from('profiles')
+      .select('id, prenom, email, created_at')
+      .eq('ref_code', code)
+      .order('created_at', { ascending: false })
+  ]);
 
   const liste = filleuls || [];
 
-  // Parmi les filleuls, trouver ceux qui ont activé une clé
+  // Acheteurs parmi les filleuls
   let acheteurIds = new Set();
   if (liste.length > 0) {
     const ids = liste.map(u => u.id);
@@ -95,7 +102,7 @@
     <div class="part-stats">
       <div class="part-stat">
         <div class="part-stat-label"><i data-lucide="mouse-pointer-click"></i> Visiteurs</div>
-        <div class="part-stat-value" style="font-size:20px;color:var(--color-text-muted)">—</div>
+        <div class="part-stat-value">${nbVisiteurs || 0}</div>
       </div>
       <div class="part-stat">
         <div class="part-stat-label"><i data-lucide="user-plus"></i> Inscrits</div>

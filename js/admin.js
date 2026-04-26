@@ -67,7 +67,7 @@ function renderStats(inscrits, payants, progMoy, enAttente) {
 }
 
 async function loadUsers() {
-  const { data: profiles } = await sb.from('profiles').select('id, prenom, email, role, created_at').order('created_at', { ascending: false });
+  const { data: profiles } = await sb.from('profiles').select('id, prenom, email, role, created_at, ref_code').order('created_at', { ascending: false });
   const { data: accesRows } = await sb.from('acces').select('user_id, type, actif');
   const { data: progRows }  = await sb.from('progression').select('user_id').eq('lu', true);
 
@@ -96,7 +96,10 @@ function renderUsers(users) {
   tbody.innerHTML = users.map(u => `
     <tr>
       <td class="name">${u.prenom || '—'}</td>
-      <td class="muted">${u.email || '—'}</td>
+      <td class="muted">
+        ${u.email || '—'}
+        ${u.ref_code ? `<br><span style="font-size:10px;font-family:monospace;color:var(--color-red);">via ${u.ref_code}</span>` : ''}
+      </td>
       <td class="muted">${formatDate(u.created_at)}</td>
       <td>${u.chapLus} / ${totalChapitres}</td>
       <td>
