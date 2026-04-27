@@ -22,10 +22,34 @@
 .dash-user {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   font-size: 14px;
   color: var(--color-text-muted);
 }
+
+/* Avatar header */
+.dash-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+  border: 2px solid var(--color-border);
+  transition: border-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dash-avatar:hover { border-color: var(--color-red); }
+.dash-avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dash-avatar-default {
+  width: 100%; height: 100%;
+  background: #252525;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-text-muted);
+}
+.dash-avatar-default svg { width: 18px; height: 18px; }
 
 .dash-signout {
   font-size: 13px;
@@ -219,6 +243,120 @@
   border-radius: 8px;
   margin-bottom: 10px;
 }
+
+/* ===== SECTION AVIS LECTEUR ===== */
+.comment-lock {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: 10px;
+  padding: 20px 24px;
+}
+.comment-lock svg { width: 22px; height: 22px; color: var(--color-text-muted); flex-shrink: 0; }
+.comment-lock-title { font-size: 15px; font-weight: 600; color: var(--color-text-muted); margin-bottom: 4px; }
+.comment-lock-sub { font-size: 13px; color: var(--color-text-muted); }
+
+.comment-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 28px;
+}
+.comment-section-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-white);
+  margin-bottom: 6px;
+}
+.comment-section-sub { font-size: 13px; color: var(--color-text-muted); margin-bottom: 22px; }
+
+/* Notice avatar */
+.comment-avatar-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(245,158,11,0.07);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+.comment-avatar-notice svg { width: 16px; height: 16px; color: #f59e0b; flex-shrink: 0; }
+.comment-avatar-notice strong { color: var(--color-text-soft); }
+
+/* Étoiles */
+.star-row { display: flex; align-items: center; gap: 4px; margin-bottom: 16px; }
+.star {
+  font-size: 30px;
+  color: var(--color-border);
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.1s, transform 0.1s;
+  user-select: none;
+}
+.star:hover, .star.active { color: #f59e0b; transform: scale(1.15); }
+.star-label { font-size: 13px; color: var(--color-text-muted); margin-left: 10px; }
+
+/* Textarea */
+.comment-textarea {
+  width: 100%;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-soft);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+  padding: 12px 14px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.comment-textarea:focus { border-color: var(--color-red); }
+.comment-textarea::placeholder { color: var(--color-text-muted); }
+
+.comment-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+.comment-char { font-size: 12px; color: var(--color-text-muted); }
+
+.comment-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: var(--color-red);
+  color: var(--color-white);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.comment-submit:hover { opacity: 0.85; }
+.comment-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.comment-submit svg { width: 15px; height: 15px; }
+
+/* Avis soumis */
+.comment-done { margin-top: 12px; }
+.comment-stars-display { font-size: 24px; color: #f59e0b; letter-spacing: 3px; margin-bottom: 10px; }
+.comment-done-text {
+  font-size: 15px;
+  color: var(--color-text-soft);
+  font-style: italic;
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+.comment-done-date { font-size: 12px; color: var(--color-text-muted); }
 
 @media (max-width: 600px) {
   .dash-main { padding: 24px 16px; }

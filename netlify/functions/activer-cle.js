@@ -8,7 +8,7 @@ const CORS = {
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: CORS, body: '' };
-  if (event.httpMethod !== 'POST') return { statusCode: 405, headers: CORS, body: '' };
+  if (event.httpMethod !== 'POST')    return { statusCode: 405, headers: CORS, body: '' };
 
   const token = event.headers.authorization?.replace('Bearer ', '');
   if (!token) {
@@ -21,6 +21,7 @@ exports.handler = async (event) => {
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 
+  // Vérifier la session
   const { data: { user }, error: authError } = await sb.auth.getUser(token);
   if (authError || !user) {
     return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Session invalide.' }) };
@@ -36,23 +37,46 @@ exports.handler = async (event) => {
     return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Clé manquante.' }) };
   }
 
-  // Vérifier que la clé existe et est disponible
-  const { data: cle } = await sb
-    .from('cles')
-    .select('id')
-    .eq('code', code)
-    .eq('statut', 'unused')
-    .single();
-
-  if (!cle) {
-    return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Clé invalide ou déjà utilisée.' }) };
+  // ── 0. Garde-fou : la service-role key DOIT être configurée ──────────────────
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.SUPABASE_URL) {
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Configuration serveur manquante (SUPABASE_SERVICE_ROLE_KEY).' }) };
   }
 
-  // Lire le prix actuel depuis config
-  const { data: configRow } = await sb.from('config').select('prix_actuel').limit(1).single();
+  // ── 1. Vérifier que la clé est disponible ────────────────────────────────────
+  const { data: cle, error: cleErr } = await sb
+    .from('cles')
+    .select('id, statut')
+    .eq('code', code)
+    .maybeSingle();
+
+  if (cleErr) {
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Erreur base de données: ' + cleErr.message }) };
+  }
+  if (!cle) {
+    return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Clé inexistante. Vérifie la saisie.' }) };
+  }
+  if (cle.statut !== 'unused') {
+    return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Cette clé a déjà été utilisée.' }) };
+  }
+
+  // ── 2. Charger config + profil + guide actif en parallèle ────────────────────
+  const [
+    { data: configRow },
+    { data: profile },
+    { data: guide }
+  ] = await Promise.all([
+    sb.from('config').select('prix_actuel').limit(1).single(),
+    sb.from('profiles').select('ref_code').eq('id', user.id).maybeSingle(),
+    sb.from('guides').select('id').eq('actif', true).maybeSingle()
+  ]);
+
+  if (!guide) {
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Aucun guide actif trouvé.' }) };
+  }
+
   const prixActuel = configRow?.prix_actuel || 0;
 
-  // Marquer la clé comme utilisée + snapshot du prix
+  // ── 3. Marquer la clé utilisée ───────────────────────────────────────────────
   await sb.from('cles').update({
     statut: 'used',
     utilise_par: user.email,
@@ -60,49 +84,67 @@ exports.handler = async (event) => {
     prix_achat: prixActuel
   }).eq('id', cle.id);
 
-  // Activer l'accès de l'utilisateur
-  const { error: accesError } = await sb
+  // ── 4. Accès : UPDATE si existe, INSERT sinon ────────────────────────────────
+  // Raison : creer-compte.js ne crée pas de ligne acces — il faut donc la créer ici.
+  const { data: existingAcces } = await sb
     .from('acces')
-    .update({ actif: true, type: 'paid' })
-    .eq('user_id', user.id);
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('guide_id', guide.id)
+    .maybeSingle();
 
-  if (accesError) {
-    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Erreur lors de l\'activation.' }) };
-  }
+  let accesId;
 
-  // Créer une commission si l'utilisateur a été référé par un partenaire
-  if (prixActuel > 0) {
-    const { data: profile } = await sb
-      .from('profiles')
-      .select('ref_code')
-      .eq('id', user.id)
+  if (existingAcces) {
+    await sb.from('acces')
+      .update({ actif: true, type: 'paid' })
+      .eq('id', existingAcces.id);
+    accesId = existingAcces.id;
+  } else {
+    const { data: newAcces, error: insertErr } = await sb
+      .from('acces')
+      .insert({
+        user_id: user.id,
+        guide_id: guide.id,
+        type: 'paid',
+        actif: true
+      })
+      .select('id')
       .single();
 
-    if (profile?.ref_code) {
-      const { data: partenaire } = await sb
-        .from('partenaires')
+    if (insertErr) {
+      return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: "Erreur lors de la création de l'accès." }) };
+    }
+    accesId = newAcces.id;
+  }
+
+  // ── 5. Commission partenaire (si ref_code présent) ───────────────────────────
+  // Règle : inscrit via lien partenaire = acquis à vie pour ce partenaire.
+  if (profile?.ref_code && accesId) {
+    const { data: partenaire } = await sb
+      .from('partenaires')
+      .select('id')
+      .eq('code_partenaire', profile.ref_code)
+      .eq('statut', 'validé')
+      .maybeSingle();
+
+    if (partenaire) {
+      const { data: existingComm } = await sb
+        .from('commissions')
         .select('id')
-        .eq('code_partenaire', profile.ref_code)
-        .eq('statut', 'validé')
-        .single();
+        .eq('partenaire_id', partenaire.id)
+        .eq('acces_id', accesId)
+        .maybeSingle();
 
-      if (partenaire) {
-        const { data: acces } = await sb
-          .from('acces')
-          .select('id')
-          .eq('user_id', user.id)
-          .single();
-
-        if (acces) {
-          const commission = Math.round(prixActuel * 0.35);
-          await sb.from('commissions').insert({
-            partenaire_id: partenaire.id,
-            acces_id: acces.id,
-            montant_vente: prixActuel,
-            montant_commission: commission,
-            statut: 'en_attente'
-          });
-        }
+      if (!existingComm) {
+        const commission = Math.round(prixActuel * 0.35);
+        await sb.from('commissions').insert({
+          partenaire_id: partenaire.id,
+          acces_id: accesId,
+          montant_vente: prixActuel,
+          montant_commission: commission,
+          statut: 'en_attente'
+        });
       }
     }
   }

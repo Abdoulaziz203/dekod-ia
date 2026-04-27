@@ -15,7 +15,7 @@
 <div class="auth-page page-enter">
   <div class="auth-logo">DÉKOD<span>-IA</span></div>
 
-  <div class="auth-card skeleton" id="auth-card"></div>
+  <div class="auth-card wide skeleton" id="auth-card"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -33,13 +33,15 @@
       <p class="auth-subtitle">Accède immédiatement aux 23 chapitres du guide.</p>
 
       <form id="signup-form">
-        <div class="form-group">
-          <label for="prenom">Prénom</label>
-          <input type="text" id="prenom" placeholder="Ton prénom" required autocomplete="given-name">
-        </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" placeholder="ton@email.com" required autocomplete="email">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prenom">Prénom</label>
+            <input type="text" id="prenom" placeholder="Ton prénom" required autocomplete="given-name">
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="ton@email.com" required autocomplete="email">
+          </div>
         </div>
         <div class="form-group">
           <label for="password">Mot de passe</label>
@@ -66,7 +68,6 @@
         await signUp(prenom, email, pwd);
         await signIn(email, pwd);
         const { data: { session } } = await sb.auth.getSession();
-        // Enregistrer le code partenaire (depuis localStorage, posé lors de la visite index)
         const refCode = localStorage.getItem('dekod_ref');
         if (refCode && session) {
           await sb.from('profiles').update({ ref_code: refCode }).eq('id', session.user.id);

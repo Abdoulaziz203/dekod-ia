@@ -14,35 +14,40 @@
 
 <div class="auth-page page-enter">
   <div class="auth-logo">DÉKOD<span>-IA</span></div>
-  <div class="auth-card" id="auth-card">
+
+  <div class="auth-card wide" id="auth-card">
 
     <span style="display:inline-block;background:rgba(232,0,29,0.12);color:var(--color-red);font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;margin-bottom:16px;letter-spacing:0.5px;">
-      Programme Partenaire · 20% de commission
+      Programme Partenaire · 35% de commission
     </span>
 
     <h1>Rejoins le programme.</h1>
     <p class="auth-subtitle">Partage le guide, gagne une commission sur chaque vente générée.</p>
 
     <form id="part-form">
-      <div class="form-group">
-        <label for="nom">Nom complet</label>
-        <input type="text" id="nom" placeholder="Ton nom et prénom" required autocomplete="name">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nom">Nom complet</label>
+          <input type="text" id="nom" placeholder="Ton nom et prénom" required autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="ton@email.com" required autocomplete="email">
+        </div>
       </div>
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" placeholder="ton@email.com" required autocomplete="email">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="telephone">Téléphone</label>
+          <input type="tel" id="telephone" placeholder="+221 77 000 00 00" required autocomplete="tel">
+        </div>
+        <div class="form-group">
+          <label for="pays">Pays</label>
+          <input type="text" id="pays" placeholder="Ex : Sénégal, Côte d'Ivoire…" required>
+        </div>
       </div>
       <div class="form-group">
         <label for="password">Mot de passe</label>
-        <input type="password" id="password" placeholder="8 caractères min." required autocomplete="new-password" minlength="8">
-      </div>
-      <div class="form-group">
-        <label for="telephone">Numéro de téléphone</label>
-        <input type="tel" id="telephone" placeholder="+221 77 000 00 00" required autocomplete="tel">
-      </div>
-      <div class="form-group">
-        <label for="pays">Pays</label>
-        <input type="text" id="pays" placeholder="Ex : Sénégal, Côte d'Ivoire…" required>
+        <input type="password" id="password" placeholder="8 caractères minimum" required autocomplete="new-password" minlength="8">
       </div>
       <button type="submit" class="auth-submit" id="submit-btn">Devenir partenaire</button>
     </form>
@@ -86,20 +91,19 @@
           return;
         }
 
-        // Remplacer le formulaire par le message de confirmation
         document.getElementById('auth-card').innerHTML = `
-          <div style="text-align:center;padding:16px 0;">
-            <div style="width:56px;height:56px;border-radius:50%;background:rgba(34,197,94,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
-              <i data-lucide="clock" style="width:26px;height:26px;color:#22c55e;"></i>
+          <div style="text-align:center;padding:24px 0;">
+            <div style="width:60px;height:60px;border-radius:50%;background:rgba(34,197,94,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+              <i data-lucide="clock" style="width:28px;height:28px;color:#22c55e;"></i>
             </div>
-            <h1 style="font-size:24px;margin-bottom:12px;">Demande envoyée !</h1>
+            <h1 style="font-size:26px;margin-bottom:12px;">Demande envoyée !</h1>
             <p style="color:var(--color-text-muted);font-size:14px;line-height:1.7;">
-              Votre demande est en cours de validation.<br>
-              Revenez plus tard ou attendez notre confirmation.<br><br>
-              Vous pouvez dès maintenant vous connecter avec vos identifiants.<br>
-              Votre tableau de bord sera actif une fois votre compte validé.
+              Ta candidature est en cours de validation.<br>
+              Tu seras notifié par email dès que ton compte est activé.<br><br>
+              Tu peux te connecter dès maintenant — ton dashboard<br>
+              sera disponible une fois ton compte validé.
             </p>
-            <a href="connexion.html" style="display:inline-block;margin-top:24px;padding:12px 24px;background:var(--color-red);color:var(--color-white);border-radius:6px;font-size:15px;font-weight:600;">
+            <a href="connexion.html" style="display:inline-block;margin-top:28px;padding:13px 32px;background:var(--color-red);color:var(--color-white);border-radius:6px;font-size:15px;font-weight:600;">
               Se connecter
             </a>
           </div>

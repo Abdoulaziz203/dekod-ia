@@ -316,6 +316,58 @@
     .pourqui-check svg { width: 14px; height: 14px; }
     .pourqui-item span { font-size: 16px; color: var(--color-text-soft); }
 
+    /* ===== TÉMOIGNAGES ===== */
+    .section-avis { padding: 96px 0; }
+    .avis-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 48px;
+    }
+    .avis-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .avis-card-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .avis-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 2px solid var(--color-border);
+    }
+    .avis-name { font-size: 15px; font-weight: 600; color: var(--color-white); }
+    .avis-stars { font-size: 14px; color: #f59e0b; letter-spacing: 1px; }
+    .avis-text {
+      font-size: 14px;
+      color: var(--color-text-muted);
+      line-height: 1.7;
+      font-style: italic;
+      flex: 1;
+    }
+    .avis-empty {
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 14px;
+      padding: 48px 0;
+      grid-column: 1/-1;
+    }
+    @media (max-width: 768px) {
+      .avis-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .avis-grid { grid-template-columns: 1fr; }
+    }
+
     /* ===== PRIX ===== */
     .section-prix { padding: 96px 0; }
     .prix-card {
@@ -625,6 +677,17 @@
   </div>
 </section>
 
+<!-- AVIS LECTEURS -->
+<section class="section-avis" id="section-avis" style="display:none">
+  <div class="container">
+    <div class="reveal" style="text-align:center">
+      <p class="section-label">Avis vérifiés</p>
+      <h2 class="section-title">Ce qu'ils en pensent.</h2>
+    </div>
+    <div id="avis-grid" class="avis-grid"></div>
+  </div>
+</section>
+
 <!-- PRIX -->
 <section class="section-prix">
   <div class="container">
@@ -723,6 +786,43 @@
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script>lucide.createIcons();</script>
 <script>
+  // Chargement des avis lecteurs (uniquement ceux avec photo de profil)
+  (async () => {
+    const { data: avis } = await sb
+      .from('commentaires')
+      .select('prenom, note, contenu, avatar_url')
+      .not('avatar_url', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(6);
+
+    const grid = document.getElementById('avis-grid');
+    const section = document.getElementById('section-avis');
+    if (!grid || !section || !avis || avis.length === 0) return;
+
+    grid.innerHTML = avis.map(a => `
+      <div class="avis-card reveal">
+        <div class="avis-card-top">
+          <img src="${a.avatar_url}" alt="${a.prenom}" class="avis-avatar"
+            onerror="this.style.display='none'">
+          <div>
+            <div class="avis-name">${a.prenom || 'Lecteur'}</div>
+            <div class="avis-stars">${'★'.repeat(a.note)}${'☆'.repeat(5 - a.note)}</div>
+          </div>
+        </div>
+        <p class="avis-text">"${a.contenu}"</p>
+      </div>
+    `).join('');
+
+    section.style.display = '';
+    lucide.createIcons();
+
+    // Activer les reveals des cartes d'avis
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    grid.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  })();
+
   // Tracking lien partenaire — exécuté dès l'arrivée sur la landing page
   (function () {
     const ref = new URLSearchParams(window.location.search).get('ref');

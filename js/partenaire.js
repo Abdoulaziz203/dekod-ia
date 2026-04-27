@@ -56,8 +56,9 @@
   }
 
   // ── Validé → Dashboard complet ───────────────────────────────────────────────
-  const code    = partenaire.code_partenaire || '—';
-  const lienRef = `https://dekod-ia.netlify.app/?ref=${code}`;
+  const code       = partenaire.code_partenaire || '—';
+  const isServé    = window.location.protocol.startsWith('http');
+  const lienRef    = isServé ? `${window.location.origin}/?ref=${code}` : null;
 
   const prixActuel  = configRow?.prix_actuel || 0;
   const estGratuit  = configRow?.est_gratuit ?? true;
@@ -76,10 +77,27 @@
       .eq('partenaire_id', partenaire.id)
   ]);
 
-  const liste     = filleuls || [];
-  const commList  = commissions || [];
+  const liste    = filleuls || [];
+  const commList = commissions || [];
 
-  const acheteurIds = new Set(commList.map(c => c.acces?.user_id).filter(Boolean));
+  // Acheteurs détectés via commissions
+  const acheteurIdsFromComm = new Set(commList.map(c => c.acces?.user_id).filter(Boolean));
+
+  // Fallback : acheteurs via acces.type='paid' (couvre les cas où la commission
+  // n'a pas été créée — ex. activation pendant mode test prix=0)
+  let acheteurIds = acheteurIdsFromComm;
+  if (liste.length > 0) {
+    const filleulIds = liste.map(u => u.id);
+    const { data: paidAcces } = await sb
+      .from('acces')
+      .select('user_id')
+      .eq('type', 'paid')
+      .in('user_id', filleulIds);
+    acheteurIds = new Set([
+      ...acheteurIdsFromComm,
+      ...(paidAcces || []).map(r => r.user_id)
+    ]);
+  }
 
   const totalGains  = commList.reduce((s, c) => s + (c.montant_commission || 0), 0);
   const totalPaye   = commList.filter(c => c.statut === 'payé').reduce((s, c) => s + (c.montant_commission || 0), 0);
@@ -118,12 +136,21 @@
     <!-- Lien d'affiliation -->
     <div class="code-card">
       <p class="code-label">Ton lien d'affiliation</p>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;">
-        <code style="font-family:monospace;font-size:13px;color:var(--color-text-soft);background:var(--color-bg);padding:10px 14px;border-radius:6px;border:1px solid var(--color-border);word-break:break-all;">${lienRef}</code>
-      </div>
-      <button class="btn-copy" id="btn-copy-link" ${estGratuit ? 'disabled style="opacity:0.4;cursor:not-allowed"' : ''}>
-        <i data-lucide="link"></i> Copier le lien
-      </button>
+      ${estGratuit ? `
+        <p style="color:var(--color-text-muted);font-size:13px;margin-bottom:12px;">Le lien est désactivé tant que le guide est gratuit.</p>
+      ` : lienRef ? `
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;">
+          <code style="font-family:monospace;font-size:13px;color:var(--color-text-soft);background:var(--color-bg);padding:10px 14px;border-radius:6px;border:1px solid var(--color-border);word-break:break-all;">${lienRef}</code>
+        </div>
+        <button class="btn-copy" id="btn-copy-link">
+          <i data-lucide="link"></i> Copier le lien
+        </button>
+      ` : `
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(255,255,255,0.04);border:1px solid var(--color-border);border-radius:8px;margin-bottom:12px;">
+          <i data-lucide="info" style="color:var(--color-text-muted);flex-shrink:0;width:16px;height:16px;"></i>
+          <span style="font-size:13px;color:var(--color-text-muted);">Lien disponible une fois le site hébergé. Ton code : <strong style="color:var(--color-red);font-family:monospace;">${code}</strong></span>
+        </div>
+      `}
     </div>
 
     <!-- Stats -->
@@ -166,7 +193,7 @@
                </tr>
              </thead>
              <tbody>
-               ${commList.map(c => {
+               ${buildToggleRows(commList, c => {
                  const user = c.acces?.profiles || {};
                  return `<tr>
                    <td class="name">${user.prenom || '—'}</td>
@@ -179,7 +206,7 @@
                    </td>
                    <td class="muted">${formatDate(c.created_at)}</td>
                  </tr>`;
-               }).join('')}
+               }, 6)}
              </tbody>
            </table>`
       }
@@ -203,7 +230,7 @@
                </tr>
              </thead>
              <tbody>
-               ${liste.map(u => `
+               ${buildToggleRows(liste, u => `
                  <tr>
                    <td class="name">${u.prenom || '—'}</td>
                    <td class="muted">${u.email || '—'}</td>
@@ -213,15 +240,16 @@
                      : '<span class="badge-statut badge-attente"><i data-lucide="clock"></i> Inscrit</span>'
                    }</td>
                  </tr>
-               `).join('')}
+               `, 4)}
              </tbody>
            </table>`
       }
     </div>
   `;
 
-  if (!estGratuit) {
-    document.getElementById('btn-copy-link').addEventListener('click', () => {
+  if (!estGratuit && lienRef) {
+    const copyBtn = document.getElementById('btn-copy-link');
+    if (copyBtn) copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(lienRef).then(() => toast('Lien copié !', 'success'));
     });
   }

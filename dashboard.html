@@ -15,6 +15,10 @@
 <header class="dash-header">
   <div class="dash-logo">DÉKOD<span>-IA</span></div>
   <div class="dash-user">
+    <div class="dash-avatar" id="dash-avatar" title="Changer ma photo de profil">
+      <div class="dash-avatar-default"><i data-lucide="user"></i></div>
+      <input type="file" id="avatar-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+    </div>
     <span id="user-prenom"></span>
     <button class="dash-signout" onclick="signOut()">
       <i data-lucide="log-out"></i> Déconnexion
@@ -36,6 +40,9 @@
     <div class="skeleton skeleton-partie"></div>
     <div class="skeleton skeleton-partie"></div>
   </div>
+
+  <!-- Section avis lecteur -->
+  <div id="commentaire-section" style="margin-top:32px;"></div>
 
 </main>
 

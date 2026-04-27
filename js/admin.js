@@ -6,7 +6,7 @@ async function initAdmin() {
   const session = await requireRole('admin');
   if (!session) return;
 
-  await Promise.all([loadStats(), loadUsers(), loadCles(), loadConfig(), loadPartenaires()]);
+  await Promise.all([loadStats(), loadUsers(), loadCles(), loadConfig(), loadPartenaires(), loadAvis()]);
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
@@ -100,7 +100,7 @@ function renderUsers(users) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--color-text-muted);padding:32px">Aucun utilisateur trouvé.</td></tr>`;
     return;
   }
-  tbody.innerHTML = users.map(u => `
+  tbody.innerHTML = buildToggleRows(users, u => `
     <tr>
       <td class="name">${u.prenom || '—'}</td>
       <td class="muted">
@@ -130,7 +130,7 @@ function renderUsers(users) {
           : '—'}
       </td>
     </tr>
-  `).join('');
+  `, 7);
   lucide.createIcons();
 }
 
@@ -175,7 +175,7 @@ function renderCles(cles) {
     return;
   }
 
-  tbody.innerHTML = cles.map(c => {
+  tbody.innerHTML = buildToggleRows(cles, c => {
     const masked = maskKey(c.code);
     return `<tr>
       <td class="muted" style="font-family:monospace">#${String(c.numero_interne).padStart(3, '0')}</td>
@@ -195,7 +195,7 @@ function renderCles(cles) {
       <td class="muted">${c.active_at ? formatDate(c.active_at) : '—'}</td>
       <td class="muted">${c.prix_achat > 0 ? c.prix_achat + ' FCFA' : '—'}</td>
     </tr>`;
-  }).join('');
+  }, 6);
   lucide.createIcons();
 }
 
@@ -259,10 +259,10 @@ async function loadConfig() {
   const { data } = await sb.from('config').select('prix_actuel, est_gratuit').limit(1).single();
   if (!data) return;
 
-  const input = document.getElementById('config-prix');
-  const toggle = document.getElementById('config-gratuit');
-  if (input)  input.value = data.prix_actuel;
-  if (toggle) toggle.checked = data.est_gratuit;
+  const input   = document.getElementById('config-prix');
+  const display = document.getElementById('config-prix-display');
+  if (input)   input.value = data.prix_actuel;
+  if (display) display.textContent = data.prix_actuel >= 600 ? data.prix_actuel.toLocaleString('fr-FR') + ' FCFA' : '— FCFA';
 
   updateGratuitLabel(data.est_gratuit);
 }
@@ -270,34 +270,135 @@ async function loadConfig() {
 function updateGratuitLabel(isGratuit) {
   const label = document.getElementById('gratuit-label');
   if (!label) return;
-  label.textContent = isGratuit
-    ? 'Mode gratuit actif — les liens partenaires sont désactivés'
-    : 'Liens partenaires actifs';
+  // Le guide ne peut plus être à 0 — on affiche juste l'état des partenaires
+  label.textContent = isGratuit ? 'Liens partenaires désactivés' : 'Liens partenaires actifs';
   label.className = isGratuit ? 'config-note red' : 'config-note';
 }
 
 async function saveConfig() {
   const prix = parseInt(document.getElementById('config-prix')?.value || '0', 10);
-  const estGratuit = prix === 0;
 
-  const toggle = document.getElementById('config-gratuit');
-  if (toggle) toggle.checked = estGratuit;
-  updateGratuitLabel(estGratuit);
+  if (!prix || prix < 600) {
+    toast('Le prix minimum est 600 FCFA.', 'error');
+    return;
+  }
+
+  const estGratuit = false; // prix toujours >= 600 → jamais gratuit via l'UI
 
   const btn = document.getElementById('btn-save-config');
   btn.disabled = true;
-  btn.textContent = 'Sauvegarde…';
+  btn.innerHTML = '<i data-lucide="loader"></i> Sauvegarde…';
+  lucide.createIcons();
 
   const { error } = await sb.from('config').update({ prix_actuel: prix, est_gratuit: estGratuit }).eq('id', 1);
   if (error) {
     toast('Erreur lors de la sauvegarde.', 'error');
   } else {
+    const display = document.getElementById('config-prix-display');
+    if (display) display.textContent = prix.toLocaleString('fr-FR') + ' FCFA';
+    updateGratuitLabel(estGratuit);
     toast('Prix mis à jour.', 'success');
     await loadStats();
   }
 
   btn.disabled = false;
-  btn.textContent = 'Sauvegarder';
+  btn.innerHTML = '<i data-lucide="save"></i> Sauvegarder';
+  lucide.createIcons();
+}
+
+// ── Avis lecteurs ─────────────────────────────────────────────────────────────
+
+// Masquer partiellement un email : ab***@gmail.com
+function maskEmail(email) {
+  if (!email) return null;
+  const [local, domain] = email.split('@');
+  if (!domain) return email;
+  return local.slice(0, 2) + '***@' + domain;
+}
+
+// Tronquer un texte long
+function truncate(str, len) {
+  len = len || 52;
+  if (!str) return '—';
+  return str.length > len ? str.slice(0, len) + '…' : str;
+}
+
+// Échapper les attributs HTML
+function escAttr(str) {
+  return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
+
+// Copier depuis un data-attribute (évite les problèmes d'échappement inline)
+function copyFromData(btn) {
+  const text = btn.dataset.copy || '';
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i data-lucide="check"></i>';
+    lucide.createIcons();
+    setTimeout(() => { btn.innerHTML = orig; lucide.createIcons(); }, 2000);
+  });
+}
+
+async function loadAvis() {
+  // Charger avis + user_ids pour fallback email
+  const { data: avis } = await sb
+    .from('commentaires')
+    .select('id, user_id, prenom, email, avatar_url, note, contenu, created_at')
+    .order('created_at', { ascending: false });
+
+  const tbody = document.getElementById('avis-tbody');
+  const count = document.getElementById('avis-count');
+  if (!tbody) return;
+
+  const liste = avis || [];
+
+  // Fallback email : chercher dans profiles pour ceux sans email stocké
+  const manquants = liste.filter(a => !a.email).map(a => a.user_id);
+  const profileMap = {};
+  if (manquants.length > 0) {
+    const { data: profs } = await sb.from('profiles').select('id, email').in('id', manquants);
+    (profs || []).forEach(p => { profileMap[p.id] = p.email; });
+  }
+
+  if (count) count.textContent = liste.length > 0 ? `${liste.length} avis` : '';
+
+  if (liste.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--color-text-muted);padding:32px">Aucun avis pour l'instant.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = buildToggleRows(liste, a => {
+    const emailVal  = a.email || profileMap[a.user_id] || '';
+    const masked    = maskEmail(emailVal);
+    const stars     = '★'.repeat(a.note) + '☆'.repeat(5 - a.note);
+    const contenuCourt = truncate(a.contenu, 52);
+
+    const avatar = a.avatar_url
+      ? `<img src="${a.avatar_url}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;display:block;">`
+      : `<div style="width:32px;height:32px;border-radius:50%;background:#252525;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="user" style="width:14px;height:14px;color:var(--color-text-muted);"></i></div>`;
+
+    const emailCell = masked
+      ? `<div style="display:flex;align-items:center;gap:5px;">
+           <span style="font-family:monospace;font-size:11px;color:var(--color-text-muted);white-space:nowrap;">${masked}</span>
+           <button class="btn-copy-key" data-copy="${escAttr(emailVal)}" onclick="copyFromData(this)" title="Copier l'email"><i data-lucide="copy"></i></button>
+         </div>`
+      : '—';
+
+    const avisCell = `<div style="display:flex;align-items:center;gap:5px;max-width:280px;">
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;" title="${escAttr(a.contenu)}">${contenuCourt}</span>
+        <button class="btn-copy-key" data-copy="${escAttr(a.contenu)}" onclick="copyFromData(this)" title="Copier l'avis" style="flex-shrink:0;"><i data-lucide="copy"></i></button>
+      </div>`;
+
+    return `<tr>
+      <td style="padding:10px 16px;">${avatar}</td>
+      <td class="name" style="white-space:nowrap;">${a.prenom || '—'}</td>
+      <td style="white-space:nowrap;">${emailCell}</td>
+      <td style="color:#f59e0b;font-size:15px;letter-spacing:2px;white-space:nowrap;">${stars}</td>
+      <td style="white-space:nowrap;">${avisCell}</td>
+      <td class="muted" style="white-space:nowrap;">${formatDate(a.created_at)}</td>
+    </tr>`;
+  }, 6);
+  lucide.createIcons();
 }
 
 // ── Partenaires ──────────────────────────────────────────────────────────────
@@ -327,7 +428,7 @@ function renderPartenaires(parts) {
     return '<span class="badge-actif badge-revoke"><i data-lucide="x-circle"></i> Rejeté</span>';
   };
 
-  tbody.innerHTML = parts.map(p => `
+  tbody.innerHTML = buildToggleRows(parts, p => `
     <tr>
       <td class="name">${p.nom || '—'}</td>
       <td class="muted">${p.email || '—'}</td>
@@ -346,7 +447,7 @@ function renderPartenaires(parts) {
         </button>
       </td>
     </tr>
-  `).join('');
+  `, 9);
   lucide.createIcons();
 }
 

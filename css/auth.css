@@ -4,7 +4,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px 16px;
+  padding: 32px 16px;
 }
 
 .auth-logo {
@@ -12,18 +12,24 @@
   font-weight: 700;
   font-size: 28px;
   color: var(--color-white);
-  margin-bottom: 40px;
+  margin-bottom: 32px;
   letter-spacing: 0.5px;
 }
 .auth-logo span { color: var(--color-red); }
 
 .auth-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 460px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 10px;
-  padding: 36px 32px;
+  padding: 36px 36px;
+}
+
+/* Carte élargie pour formulaires multi-champs */
+.auth-card.wide {
+  max-width: 680px;
+  padding: 40px 48px;
 }
 
 .auth-card h1 {
@@ -44,6 +50,17 @@
   margin-bottom: 16px;
 }
 
+/* Grille 2 colonnes pour les champs courts */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 0;
+}
+.form-row .form-group {
+  margin-bottom: 16px;
+}
+
 .form-group label {
   font-size: 13px;
   font-weight: 500;
@@ -52,7 +69,8 @@
   letter-spacing: 0.5px;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 12px 14px;
   background: var(--color-bg);
@@ -64,7 +82,8 @@
   transition: border-color 0.15s;
   outline: none;
 }
-.form-group input:focus { border-color: var(--color-red); }
+.form-group input:focus,
+.form-group select:focus { border-color: var(--color-red); }
 .form-group input::placeholder { color: var(--color-text-muted); }
 
 .auth-submit {
@@ -94,12 +113,13 @@
   text-underline-offset: 3px;
 }
 
+/* Skeleton */
+.auth-card.skeleton { min-height: 360px; }
 
-/* Skeleton states */
-.auth-card.skeleton {
-  min-height: 360px;
+@media (max-width: 720px) {
+  .auth-card.wide { padding: 32px 24px; }
+  .form-row { grid-template-columns: 1fr; gap: 0; }
 }
-
 @media (max-width: 480px) {
   .auth-card { padding: 28px 20px; }
 }
