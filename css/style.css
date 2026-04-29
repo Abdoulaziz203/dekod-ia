@@ -268,7 +268,7 @@ p { color: var(--color-text-soft); }
 /* ===== LOGO IMAGE ===== */
 /* Taille par défaut — headers app internes (dashboard, lecteur, admin, partenaire) */
 .logo-img {
-  height: 28px;
+  height: 36px;
   width: auto;
   display: block;
   object-fit: contain;
