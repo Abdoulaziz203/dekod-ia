@@ -1,4 +1,4 @@
-// ── Modal de confirmation custom (remplace confirm() natif) ──────────────────
+﻿// ── Modal de confirmation custom (remplace confirm() natif) ──────────────────
 // Usage : const ok = await confirmModal({ title, message, confirmLabel, cancelLabel, danger });
 // Retourne Promise<boolean>
 function confirmModal(opts) {
@@ -76,7 +76,7 @@ function toast(msg, type = 'info') {
 async function requireAuth() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) {
-    window.location.href = 'connexion.html';
+    window.location.href = 'connexion';
     return null;
   }
   return session;
@@ -87,7 +87,7 @@ async function requireRole(role) {
   if (!session) return null;
   const { data: profile } = await sb.from('profiles').select('role').eq('id', session.user.id).single();
   if (!profile || profile.role !== role) {
-    window.location.href = 'dashboard.html';
+    window.location.href = 'dashboard';
     return null;
   }
   return session;

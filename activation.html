@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -442,7 +442,7 @@
 
   <!-- Logo -->
   <div class="act-header">
-    <a href="index.html" class="act-logo">DÉKOD<span>-IA</span></a>
+    <a href="index" class="act-logo">DÉKOD<span>-IA</span></a>
   </div>
 
   <!-- Barre fondateurs -->
@@ -652,10 +652,10 @@ async function loadAuthZone() {
       <div class="act-auth-prompt">
         <p>Copie une clé disponible ci-dessus,<br>puis <strong style="color:var(--color-white)">crée ton compte</strong> pour activer ton accès.</p>
         <div class="act-auth-btns">
-          <a href="inscription.html" class="act-btn-primary">
+          <a href="inscription" class="act-btn-primary">
             <i data-lucide="user-plus" style="width:15px;height:15px;"></i> Créer mon compte
           </a>
-          <a href="connexion.html" class="act-btn-secondary">
+          <a href="connexion" class="act-btn-secondary">
             <i data-lucide="log-in" style="width:15px;height:15px;"></i> Se connecter
           </a>
         </div>
@@ -668,7 +668,7 @@ async function loadAuthZone() {
   const { data: acces } = await sb
     .from('acces').select('actif')
     .eq('user_id', session.user.id).eq('actif', true).maybeSingle();
-  if (acces) { window.location.href = 'dashboard.html'; return; }
+  if (acces) { window.location.href = 'dashboard'; return; }
 
   // Formulaire d'activation
   zone.innerHTML = `
@@ -725,7 +725,7 @@ async function loadAuthZone() {
       aToast(successMsg, 'success');
       // Rafraîchir les clés pour mettre à jour la barre
       await loadKeys();
-      setTimeout(() => { window.location.href = 'onboarding.html'; }, 2200);
+      setTimeout(() => { window.location.href = 'onboarding'; }, 2200);
 
     } catch {
       aToast('Erreur réseau. Vérifie ta connexion.', 'error');

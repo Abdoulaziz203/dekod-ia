@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -344,7 +344,7 @@
     <span class="celeb-icon">🚀</span>
     <h1 class="celeb-title">T'es dans<br>la <em>bonne place.</em></h1>
     <p class="celeb-sub">Ton guide est prêt.<br>Commence au chapitre 1 — et ne t'arrête plus.</p>
-    <a href="dashboard.html" class="celeb-cta">Accéder au guide →</a>
+    <a href="dashboard" class="celeb-cta">Accéder au guide →</a>
   </div>
 </div>
 
@@ -355,11 +355,11 @@
 <script>
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
-  if (!session) { window.location.href = 'connexion.html'; return; }
+  if (!session) { window.location.href = 'connexion'; return; }
 
   const { data: profile } = await sb
     .from('profiles').select('onboarding_done').eq('id', session.user.id).single();
-  if (profile?.onboarding_done) { window.location.href = 'dashboard.html'; return; }
+  if (profile?.onboarding_done) { window.location.href = 'dashboard'; return; }
 
   /* ── Questions ─────────────────────────────────────────────────────────── */
   const QS = [

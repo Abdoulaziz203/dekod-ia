@@ -5,6 +5,11 @@
 [functions]
   node_bundler = "esbuild"
 
+[build.processing]
+  skip_processing = false
+[build.processing.html]
+  pretty_urls = true
+
 [[headers]]
   for = "/*"
   [headers.values]
@@ -16,3 +21,38 @@
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
+
+[[redirects]]
+  from = "/inscription.html"
+  to = "/inscription"
+  status = 301
+
+[[redirects]]
+  from = "/connexion.html"
+  to = "/connexion"
+  status = 301
+
+[[redirects]]
+  from = "/dashboard.html"
+  to = "/dashboard"
+  status = 301
+
+[[redirects]]
+  from = "/lire.html"
+  to = "/lire"
+  status = 301
+
+[[redirects]]
+  from = "/admin.html"
+  to = "/admin"
+  status = 301
+
+[[redirects]]
+  from = "/partenaire-inscription.html"
+  to = "/partenaire-inscription"
+  status = 301
+
+[[redirects]]
+  from = "/partenaire-dashboard.html"
+  to = "/partenaire-dashboard"
+  status = 301

@@ -1,4 +1,4 @@
-async function getSession() {
+﻿async function getSession() {
   const { data: { session } } = await sb.auth.getSession();
   return session;
 }
@@ -14,8 +14,8 @@ async function getRoleRedirect(userId) {
   }
 
   const role = profile?.role || 'lecteur';
-  if (role === 'admin')      return 'admin.html';
-  if (role === 'partenaire') return 'partenaire-dashboard.html';
+  if (role === 'admin')      return 'admin';
+  if (role === 'partenaire') return 'partenaire-dashboard';
 
   // Vérifier si l'accès est activé (clé valide saisie)
   const { data: acces } = await sb
@@ -25,8 +25,8 @@ async function getRoleRedirect(userId) {
     .eq('actif', true)
     .maybeSingle();
 
-  if (!acces) return 'activation.html';
-  return 'dashboard.html';
+  if (!acces) return 'activation';
+  return 'dashboard';
 }
 
 async function signUp(prenom, email, password) {
@@ -48,7 +48,7 @@ async function signIn(email, password) {
 async function signOut() {
   const { error } = await sb.auth.signOut();
   if (error) throw error;
-  window.location.href = 'connexion.html';
+  window.location.href = 'connexion';
 }
 
 async function redirectIfLoggedIn() {

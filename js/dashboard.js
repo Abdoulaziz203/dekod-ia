@@ -1,4 +1,4 @@
-let guideId = null;
+﻿let guideId = null;
 let _currentUserId = null;
 
 async function initDashboard() {
@@ -17,7 +17,7 @@ async function initDashboard() {
   // Afficher le prénom + charger avatar
   const { data: profile } = await sb.from('profiles').select('prenom, avatar_url, onboarding_done').eq('id', session.user.id).single();
   // Garde : si l'onboarding n'a pas été complété, y envoyer
-  if (!profile?.onboarding_done) { window.location.href = 'onboarding.html'; return; }
+  if (!profile?.onboarding_done) { window.location.href = 'onboarding'; return; }
 
   const prenom = profile?.prenom || '';
   // Header prénom
@@ -144,7 +144,7 @@ function renderProgress(lus, total, pct, nextChap) {
     <div class="progress-bar-track">
       <div class="progress-bar-fill" style="width: ${pct}%"></div>
     </div>
-    ${nextChap ? `<a href="lire.html?id=${nextChap.id}" class="progress-continue">
+    ${nextChap ? `<a href="lire?id=${nextChap.id}" class="progress-continue">
       Continuer — ${nextChap.titre}
       <i data-lucide="arrow-right"></i>
     </a>` : ''}
@@ -186,7 +186,7 @@ function renderParties(parties, chapitres, lusSet) {
       </div>
       <div class="partie-chapitres">
         ${chapsDeLaPartie.map(c => `
-          <a href="lire.html?id=${c.id}" class="chapitre-item">
+          <a href="lire?id=${c.id}" class="chapitre-item">
             <span class="chapitre-check${lusSet.has(c.id) ? ' lu' : ''}">
               ${lusSet.has(c.id) ? '<i data-lucide="check"></i>' : ''}
             </span>
