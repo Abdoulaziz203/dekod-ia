@@ -13,8 +13,7 @@
 <body>
 
 <div class="auth-page page-enter">
-  <div class="auth-logo">DÉKOD<span>-IA</span></div>
-
+  <div class="auth-logo"><img src="assets/images/Logo.png" alt="DÉKOD-IA" class="logo-img"></div>
   <div class="auth-card wide skeleton" id="auth-card"></div>
 </div>
 
@@ -22,6 +21,8 @@
 <script src="js/supabase.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/auth.js"></script>
+<!-- Lucide chargé AVANT le script inline -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script>
   (async () => {
     await redirectIfLoggedIn();
@@ -30,38 +31,168 @@
     card.classList.remove('skeleton');
     card.innerHTML = `
       <h1>Créer mon compte</h1>
-      <p class="auth-subtitle">Accède immédiatement aux 23 chapitres du guide.</p>
+      <p class="auth-subtitle">Accède immédiatement aux 17 chapitres du guide.</p>
 
       <form id="signup-form">
         <div class="form-row">
           <div class="form-group">
             <label for="prenom">Prénom</label>
-            <input type="text" id="prenom" placeholder="Ton prénom" required autocomplete="given-name">
+            <div class="input-wrap">
+              <input type="text" id="prenom" placeholder="Ton prénom" required autocomplete="given-name">
+            </div>
           </div>
           <div class="form-group">
             <label for="email">Email</label>
-            <input type="email" id="email" placeholder="ton@email.com" required autocomplete="email">
+            <div class="input-wrap">
+              <input type="email" id="email" placeholder="ton@email.com" required autocomplete="email">
+            </div>
           </div>
         </div>
+
         <div class="form-group">
           <label for="password">Mot de passe</label>
-          <input type="password" id="password" placeholder="8 caractères minimum" required minlength="8" autocomplete="new-password">
+          <div class="input-wrap">
+            <input type="password" id="password" placeholder="8 caractères minimum" required autocomplete="new-password">
+            <button type="button" class="input-eye" id="toggle-pwd" aria-label="Afficher le mot de passe">
+              <i data-lucide="eye"></i>
+            </button>
+          </div>
+          <div class="pwd-strength">
+            <div class="pwd-strength-bar">
+              <div class="pwd-strength-fill" id="pwd-fill"></div>
+            </div>
+            <span class="pwd-strength-label" id="pwd-label"></span>
+          </div>
+          <ul class="pwd-criteria">
+            <li class="pwd-crit" id="crit-len"   data-label="8 caractères minimum"><i data-lucide="circle"></i> 8 caractères minimum</li>
+            <li class="pwd-crit" id="crit-upper" data-label="Une lettre majuscule"><i data-lucide="circle"></i> Une lettre majuscule</li>
+            <li class="pwd-crit" id="crit-num"   data-label="Un chiffre"><i data-lucide="circle"></i> Un chiffre</li>
+          </ul>
         </div>
-        <button type="submit" class="auth-submit" id="submit-btn">
-          Créer mon compte
-        </button>
+
+        <div class="form-group">
+          <label for="password-confirm">Confirmer le mot de passe</label>
+          <div class="input-wrap">
+            <input type="password" id="password-confirm" placeholder="Répète ton mot de passe" required autocomplete="new-password">
+            <button type="button" class="input-eye" id="toggle-confirm" aria-label="Afficher la confirmation">
+              <i data-lucide="eye"></i>
+            </button>
+          </div>
+          <div class="pwd-match-hint" id="pwd-match-hint"></div>
+        </div>
+
+        <button type="submit" class="auth-submit" id="submit-btn">Créer mon compte</button>
       </form>
       <p class="auth-link">Tu as déjà un compte ? <a href="connexion.html">Se connecter</a></p>
     `;
+    lucide.createIcons();
 
+    // ── Toggle afficher / masquer ─────────────────────────────────────────
+    function makeToggle(btnId, inputId) {
+      document.getElementById(btnId).addEventListener('click', function () {
+        const input  = document.getElementById(inputId);
+        const hidden = input.type === 'password';
+        input.type   = hidden ? 'text' : 'password';
+        this.innerHTML = hidden ? '<i data-lucide="eye-off"></i>' : '<i data-lucide="eye"></i>';
+        lucide.createIcons();
+      });
+    }
+    makeToggle('toggle-pwd',     'password');
+    makeToggle('toggle-confirm', 'password-confirm');
+
+    // ── Critère visuel (utilise data-label pour éviter le bug textContent) ─
+    function setCrit(el, ok) {
+      const label = el.dataset.label;
+      el.classList.toggle('ok', ok);
+      el.innerHTML = (ok ? '<i data-lucide="check-circle"></i> ' : '<i data-lucide="circle"></i> ') + label;
+    }
+
+    // ── Barre de force + critères ─────────────────────────────────────────
+    document.getElementById('password').addEventListener('input', function () {
+      const val = this.value;
+      const fill  = document.getElementById('pwd-fill');
+      const label = document.getElementById('pwd-label');
+
+      const okLen   = val.length >= 8;
+      const okUpper = /[A-Z]/.test(val);
+      const okNum   = /[0-9]/.test(val);
+
+      setCrit(document.getElementById('crit-len'),   okLen);
+      setCrit(document.getElementById('crit-upper'), okUpper);
+      setCrit(document.getElementById('crit-num'),   okNum);
+      lucide.createIcons();
+
+      // Score (5 critères possibles)
+      const score = [okLen, okUpper, okNum, val.length >= 12, /[^a-zA-Z0-9]/.test(val)]
+        .filter(Boolean).length;
+
+      if (val.length === 0) {
+        fill.style.width  = '0%';
+        fill.className    = 'pwd-strength-fill';
+        label.textContent = '';
+        label.className   = 'pwd-strength-label';
+      } else if (score <= 2) {
+        fill.style.width  = '33%';
+        fill.className    = 'pwd-strength-fill weak';
+        label.textContent = 'Faible';
+        label.className   = 'pwd-strength-label weak';
+      } else if (score <= 3) {
+        fill.style.width  = '66%';
+        fill.className    = 'pwd-strength-fill medium';
+        label.textContent = 'Moyen';
+        label.className   = 'pwd-strength-label medium';
+      } else {
+        fill.style.width  = '100%';
+        fill.className    = 'pwd-strength-fill strong';
+        label.textContent = 'Fort';
+        label.className   = 'pwd-strength-label strong';
+      }
+
+      checkMatch();
+    });
+
+    // ── Correspondance des mots de passe ──────────────────────────────────
+    function checkMatch() {
+      const pwd     = document.getElementById('password').value;
+      const confirm = document.getElementById('password-confirm').value;
+      const hint    = document.getElementById('pwd-match-hint');
+      if (confirm.length === 0) {
+        hint.innerHTML  = '';
+        hint.className  = 'pwd-match-hint';
+        return;
+      }
+      if (pwd === confirm) {
+        hint.innerHTML = '<i data-lucide="check-circle"></i> Les mots de passe correspondent';
+        hint.className = 'pwd-match-hint ok';
+      } else {
+        hint.innerHTML = '<i data-lucide="x-circle"></i> Les mots de passe ne correspondent pas';
+        hint.className = 'pwd-match-hint err';
+      }
+      lucide.createIcons();
+    }
+    document.getElementById('password-confirm').addEventListener('input', checkMatch);
+
+    // ── Soumission ────────────────────────────────────────────────────────
     document.getElementById('signup-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn    = document.getElementById('submit-btn');
-      const prenom = document.getElementById('prenom').value.trim();
-      const email  = document.getElementById('email').value.trim();
-      const pwd    = document.getElementById('password').value;
+      const btn     = document.getElementById('submit-btn');
+      const prenom  = document.getElementById('prenom').value.trim();
+      const email   = document.getElementById('email').value.trim();
+      const pwd     = document.getElementById('password').value;
+      const confirm = document.getElementById('password-confirm').value;
 
-      btn.disabled = true;
+      if (pwd.length < 8) {
+        toast('Le mot de passe doit faire au moins 8 caractères.', 'error');
+        document.getElementById('password').focus();
+        return;
+      }
+      if (pwd !== confirm) {
+        toast('Les mots de passe ne correspondent pas.', 'error');
+        document.getElementById('password-confirm').focus();
+        return;
+      }
+
+      btn.disabled    = true;
       btn.textContent = 'Création en cours…';
 
       try {
@@ -82,13 +213,11 @@
         } else {
           toast(err.message || 'Erreur lors de la création du compte.', 'error');
         }
-        btn.disabled = false;
+        btn.disabled    = false;
         btn.textContent = 'Créer mon compte';
       }
     });
   })();
 </script>
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<script>lucide.createIcons();</script>
 </body>
 </html>

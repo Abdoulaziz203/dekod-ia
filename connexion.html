@@ -13,16 +13,16 @@
 <body>
 
 <div class="auth-page page-enter">
-  <div class="auth-logo">DÉKOD<span>-IA</span></div>
-
-  <div class="auth-card skeleton" id="auth-card">
-  </div>
+  <div class="auth-logo"><img src="assets/images/Logo.png" alt="DÉKOD-IA" class="logo-img"></div>
+  <div class="auth-card skeleton" id="auth-card"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/auth.js"></script>
+<!-- Lucide chargé AVANT le script inline -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script>
   (async () => {
     await redirectIfLoggedIn();
@@ -35,21 +35,39 @@
       <form id="login-form">
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" id="email" placeholder="ton@email.com" required autocomplete="email">
+          <div class="input-wrap">
+            <input type="email" id="email" placeholder="ton@email.com" required autocomplete="email">
+          </div>
         </div>
         <div class="form-group">
           <label for="password">Mot de passe</label>
-          <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+          <div class="input-wrap">
+            <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="input-eye" id="toggle-pwd" aria-label="Afficher le mot de passe">
+              <i data-lucide="eye"></i>
+            </button>
+          </div>
         </div>
         <button type="submit" class="auth-submit" id="submit-btn">Se connecter</button>
       </form>
       <p class="auth-link">Pas encore de compte ? <a href="inscription.html">Accéder au guide</a></p>
     `;
+    lucide.createIcons();
+
+    // Toggle afficher / masquer mot de passe
+    document.getElementById('toggle-pwd').addEventListener('click', function () {
+      const input  = document.getElementById('password');
+      const hidden = input.type === 'password';
+      input.type   = hidden ? 'text' : 'password';
+      this.querySelector('svg')?.remove();
+      this.innerHTML = hidden ? '<i data-lucide="eye-off"></i>' : '<i data-lucide="eye"></i>';
+      lucide.createIcons();
+    });
 
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('submit-btn');
-      btn.disabled = true;
+      btn.disabled    = true;
       btn.textContent = 'Connexion…';
       try {
         const data = await signIn(
@@ -64,13 +82,11 @@
         } else {
           toast(err.message || 'Erreur de connexion.', 'error');
         }
-        btn.disabled = false;
+        btn.disabled    = false;
         btn.textContent = 'Se connecter';
       }
     });
   })();
 </script>
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<script>lucide.createIcons();</script>
 </body>
 </html>

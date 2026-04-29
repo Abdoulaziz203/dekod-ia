@@ -3,100 +3,743 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Activation — DÉKOD-IA</title>
+  <title>Clés Fondateurs — DÉKOD-IA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/auth.css">
+  <style>
+    /* ---- Page layout ---- */
+    body { min-height: 100vh; }
+    .act-page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ---- Logo header ---- */
+    .act-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .act-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      color: var(--color-white);
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+    .act-logo span { color: var(--color-red); }
+
+    /* ---- Price card ---- */
+    .act-price-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      padding: 24px 28px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .act-price-left { flex: 1; min-width: 0; }
+    .act-price-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--color-text-muted);
+      margin-bottom: 6px;
+    }
+    .act-price-amount {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--color-white);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .act-price-amount em {
+      font-style: normal;
+      font-size: 18px;
+      color: var(--color-text-muted);
+      margin-left: 4px;
+    }
+    .act-price-free {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #22c55e;
+    }
+    .act-price-sub {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      margin-top: 5px;
+    }
+    .act-buy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 14px 28px;
+      background: var(--color-red);
+      color: var(--color-white);
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: filter 0.15s, transform 0.15s;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .act-buy-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .act-buy-btn:active { transform: translateY(0); }
+    .act-buy-btn i { width: 16px; height: 16px; }
+    .act-price-skeleton {
+      height: 96px;
+      background: linear-gradient(90deg,#1A1A1A 25%,#252525 50%,#1A1A1A 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 14px;
+      margin-bottom: 28px;
+    }
+
+    /* ---- Counter / barre ---- */
+    .act-counter {
+      background: linear-gradient(180deg, rgba(232,0,29,0.07), var(--color-surface));
+      border: 1px solid rgba(232,0,29,0.3);
+      border-radius: 14px;
+      padding: 22px 26px;
+      margin-bottom: 32px;
+    }
+    .act-counter-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .act-counter-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .act-dot {
+      width: 7px; height: 7px;
+      background: var(--color-red);
+      border-radius: 50%;
+      animation: adot 1.8s ease-in-out infinite;
+      box-shadow: 0 0 0 3px rgba(232,0,29,0.2);
+    }
+    @keyframes adot {
+      0%,100% { box-shadow: 0 0 0 3px rgba(232,0,29,0.2); }
+      50%      { box-shadow: 0 0 0 7px rgba(232,0,29,0); }
+    }
+    .act-counter-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--color-white);
+      line-height: 1;
+    }
+    .act-counter-num em { font-style:normal; color:var(--color-text-muted); font-size:20px; }
+    .act-bar {
+      height: 7px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .act-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-red), #ff4d61);
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.9s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 0 0 10px rgba(232,0,29,0.45);
+    }
+
+    /* ---- Section title ---- */
+    .act-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--color-text-muted);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .act-section-note {
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--color-text-muted);
+    }
+
+    /* ---- Keys grid ---- */
+    .act-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+    .act-key {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      transition: border-color 0.2s;
+      position: relative;
+    }
+    .act-key.available:hover { border-color: rgba(232,0,29,0.4); }
+    .act-key.used {
+      opacity: 0.4;
+    }
+    .act-key-n {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-bottom: 7px;
+    }
+    .act-key-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-white);
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      word-break: break-all;
+      line-height: 1.4;
+    }
+    .act-key.used .act-key-code { color: var(--color-text-muted); }
+    .act-key-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 99px;
+      margin-bottom: 10px;
+    }
+    .act-key-badge.ok {
+      background: rgba(34,197,94,0.1);
+      color: #22c55e;
+      border: 1px solid rgba(34,197,94,0.3);
+    }
+    .act-key-badge.used {
+      background: rgba(160,160,160,0.07);
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+    }
+    .act-copy-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 8px;
+      background: rgba(232,0,29,0.12);
+      color: var(--color-red);
+      border: 1px solid rgba(232,0,29,0.3);
+      border-radius: 7px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+    .act-copy-btn:hover {
+      background: rgba(232,0,29,0.2);
+      border-color: rgba(232,0,29,0.5);
+    }
+    .act-copy-btn.copied {
+      background: rgba(34,197,94,0.1);
+      color: #22c55e;
+      border-color: rgba(34,197,94,0.4);
+    }
+
+    /* ---- Skeleton ---- */
+    .act-key-skeleton {
+      height: 110px;
+      background: linear-gradient(90deg,#1A1A1A 25%,#252525 50%,#1A1A1A 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 10px;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ---- Divider ---- */
+    .act-divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 8px 0 32px;
+      color: var(--color-text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .act-divider::before, .act-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--color-border);
+    }
+
+    /* ---- Activation form card ---- */
+    .act-form-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      padding: 32px 28px;
+    }
+    .act-form-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--color-white);
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+    .act-form-sub {
+      font-size: 14px;
+      color: var(--color-text-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .act-input-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .act-input {
+      flex: 1;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      letter-spacing: 1px;
+      color: var(--color-white);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .act-input:focus { border-color: var(--color-red); }
+    .act-input::placeholder { color: var(--color-text-muted); letter-spacing: 0; font-family: 'Inter', sans-serif; font-size: 13px; }
+    .act-submit {
+      padding: 12px 24px;
+      background: var(--color-red);
+      color: var(--color-white);
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: filter 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+    .act-submit:hover { filter: brightness(1.08); }
+    .act-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* ---- Auth prompt (if not logged in) ---- */
+    .act-auth-prompt {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      padding: 28px;
+      text-align: center;
+    }
+    .act-auth-prompt p {
+      font-size: 14px;
+      color: var(--color-text-muted);
+      margin-bottom: 18px;
+      line-height: 1.6;
+    }
+    .act-auth-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .act-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 11px 22px;
+      background: var(--color-red);
+      color: var(--color-white);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: filter 0.15s;
+    }
+    .act-btn-primary:hover { filter: brightness(1.08); }
+    .act-btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 11px 22px;
+      border: 1px solid var(--color-border);
+      color: var(--color-text-soft);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .act-btn-secondary:hover { border-color: var(--color-white); color: var(--color-white); }
+
+    /* ---- Toast ---- */
+    #act-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      color: var(--color-white);
+      padding: 11px 20px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 500;
+      z-index: 999;
+      transition: transform 0.3s ease, opacity 0.3s;
+      opacity: 0;
+      white-space: nowrap;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    #act-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    #act-toast.success { border-color:rgba(34,197,94,0.5); background:rgba(34,197,94,0.12); color:#22c55e; }
+    #act-toast.error   { border-color:rgba(232,0,29,0.5);  background:rgba(232,0,29,0.1);  color:var(--color-red); }
+
+    @media (max-width: 700px) {
+      .act-grid { grid-template-columns: repeat(2, 1fr); }
+      .act-input-row { flex-direction: column; }
+      .act-submit { width: 100%; }
+    }
+    @media (max-width: 480px) {
+      .act-grid { grid-template-columns: 1fr; }
+      .act-page { padding: 32px 16px 60px; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="auth-page page-enter">
-  <div class="auth-logo">DÉKOD<span>-IA</span></div>
+<div class="act-page page-enter">
 
-  <div class="auth-card skeleton" id="auth-card"></div>
+  <!-- Logo -->
+  <div class="act-header">
+    <a href="index.html" class="act-logo">DÉKOD<span>-IA</span></a>
+  </div>
+
+  <!-- Barre fondateurs -->
+  <div class="act-counter">
+    <div class="act-counter-top">
+      <span class="act-counter-label">
+        <span class="act-dot"></span>
+        Places fondateurs disponibles
+      </span>
+      <span class="act-counter-num"><span id="act-val">—</span><em> / <span id="act-total">—</span></em></span>
+    </div>
+    <div class="act-bar">
+      <div class="act-bar-fill" id="act-fill"></div>
+    </div>
+  </div>
+
+  <!-- Price card — remplie dynamiquement -->
+  <div id="act-price-zone">
+    <div class="act-price-skeleton"></div>
+  </div>
+
+  <!-- Clés publiques -->
+  <div class="act-section-title" id="act-keys-title">
+    Clés fondateurs gratuites
+    <span class="act-section-note">Copie une clé disponible</span>
+  </div>
+
+  <div class="act-grid" id="act-grid">
+    <!-- skeletons -->
+    <div class="act-key-skeleton"></div><div class="act-key-skeleton"></div>
+    <div class="act-key-skeleton"></div><div class="act-key-skeleton"></div>
+    <div class="act-key-skeleton"></div><div class="act-key-skeleton"></div>
+  </div>
+
+  <!-- Divider -->
+  <div class="act-divider">Activer mon accès</div>
+
+  <!-- Zone auth — remplie dynamiquement -->
+  <div id="act-auth-zone">
+    <!-- skeleton -->
+    <div class="act-key-skeleton" style="height:130px;border-radius:14px;"></div>
+  </div>
+
 </div>
+
+<div id="act-toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase.js"></script>
 <script src="js/utils.js"></script>
-<script src="js/auth.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script>
-  (async () => {
-    // Pas de session → connexion
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) { window.location.href = 'connexion.html'; return; }
+/* ---- Toast ---- */
+function aToast(msg, type) {
+  const t = document.getElementById('act-toast');
+  t.textContent = msg;
+  t.className = 'show ' + (type || '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => { t.className = ''; }, 3500);
+}
 
-    // Accès déjà actif → dashboard
-    const { data: acces } = await sb
-      .from('acces')
-      .select('actif')
-      .eq('user_id', session.user.id)
-      .eq('actif', true)
-      .maybeSingle();
-    if (acces) { window.location.href = 'dashboard.html'; return; }
+/* ---- Copier dans le presse-papier (copie simple, rien en DB) ---- */
+async function copyKey(code, btn) {
+  try {
+    await navigator.clipboard.writeText(code);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = code;
+    ta.style.cssText = 'position:fixed;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+  // UI feedback
+  const prev = btn.innerHTML;
+  btn.className = 'act-copy-btn copied';
+  btn.innerHTML = '<i data-lucide="check" style="width:13px;height:13px;"></i> Copiée !';
+  lucide.createIcons();
+  // Pré-remplir le champ activation si présent
+  const input = document.getElementById('act-input');
+  if (input) { input.value = code; input.focus(); }
+  aToast('Clé copiée ! Colle-la dans le champ ci-dessous.', 'success');
+  setTimeout(() => {
+    btn.className = 'act-copy-btn';
+    btn.innerHTML = prev;
+    lucide.createIcons();
+  }, 2000);
+}
 
-    const card = document.getElementById('auth-card');
-    card.classList.remove('skeleton');
-    card.innerHTML = `
-      <h1>Active ton accès</h1>
-      <p class="auth-subtitle">Entre ta clé d'activation pour accéder au guide.</p>
+/* ---- Charger la config (prix + lien achat) ---- */
+async function loadConfig() {
+  const zone = document.getElementById('act-price-zone');
+  try {
+    const { data: cfg } = await sb
+      .from('config')
+      .select('prix_actuel, est_gratuit, lien_achat')
+      .limit(1)
+      .single();
 
-      <form id="activation-form">
-        <div class="form-group">
-          <label for="cle">Clé d'activation</label>
-          <input type="text" id="cle" placeholder="DKOD-XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-            required autocomplete="off" spellcheck="false" style="font-family: monospace; letter-spacing: 1px;">
+    if (!cfg) { zone.innerHTML = ''; return; }
+
+    const estGratuit = cfg.est_gratuit || !cfg.prix_actuel || cfg.prix_actuel < 600;
+    const prix = cfg.prix_actuel || 0;
+    const lien = cfg.lien_achat || null;
+
+    let priceHTML;
+    if (estGratuit) {
+      priceHTML = `
+        <div class="act-price-left">
+          <div class="act-price-label">Prix d'accès</div>
+          <div class="act-price-free">GRATUIT</div>
+          <div class="act-price-sub">Utilise une clé fondateur ci-dessous pour activer ton accès.</div>
+        </div>`;
+    } else {
+      priceHTML = `
+        <div class="act-price-left">
+          <div class="act-price-label">Prix d'accès</div>
+          <div class="act-price-amount">${prix.toLocaleString('fr-FR')}<em> FCFA</em></div>
+          <div class="act-price-sub">Accès complet au guide — paiement unique, valable à vie.</div>
+        </div>`;
+    }
+
+    /* Le bouton d'achat n'est rendu que si un lien existe en base.
+       L'URL n'est jamais dans le HTML statique — elle vient de Supabase à chaque chargement. */
+    let buyBtn = '';
+    if (!estGratuit && lien) {
+      buyBtn = `<a id="act-buy-link" class="act-buy-btn" href="#" target="_blank" rel="noopener noreferrer">
+        <i data-lucide="shopping-cart"></i> Acheter maintenant
+      </a>`;
+    }
+
+    zone.innerHTML = `<div class="act-price-card">${priceHTML}${buyBtn}</div>`;
+
+    /* Injecter l'URL via JS après le rendu — jamais dans le HTML */
+    if (!estGratuit && lien) {
+      document.getElementById('act-buy-link').href = lien;
+    }
+
+    lucide.createIcons();
+  } catch(e) { zone.innerHTML = ''; }
+}
+
+/* ---- Charger et afficher les clés publiques (définies par l'admin) ---- */
+async function loadKeys() {
+  try {
+    const { data: keys } = await sb
+      .from('cles')
+      .select('code, statut')
+      .eq('is_fondateur', true)
+      .order('created_at', { ascending: true });
+
+    if (!keys) return;
+
+    const total     = keys.length;
+    const remaining = keys.filter(k => k.statut === 'unused').length;
+    const claimed   = total - remaining;
+    const pct       = total > 0 ? (claimed / total) * 100 : 0;
+
+    document.getElementById('act-val').textContent   = remaining;
+    document.getElementById('act-total').textContent = total;
+    document.getElementById('act-fill').style.width  = pct + '%';
+
+    /* Mettre à jour le titre dynamiquement */
+    const titleEl = document.getElementById('act-keys-title');
+    if (titleEl) {
+      titleEl.childNodes[0].textContent = `Clés fondateurs gratuites (${total}) `;
+    }
+
+    if (total === 0) {
+      document.getElementById('act-grid').innerHTML =
+        `<div style="grid-column:1/-1;text-align:center;color:var(--color-text-muted);padding:32px;font-size:14px;">
+           Aucune clé fondateur disponible pour l'instant.
+         </div>`;
+      return;
+    }
+
+    document.getElementById('act-grid').innerHTML = keys.map((k, i) => {
+      const used = k.statut !== 'unused';
+      return `
+        <div class="act-key ${used ? 'used' : 'available'}">
+          <div class="act-key-n">Clé #${String(i + 1).padStart(2,'0')}</div>
+          <div class="act-key-code">${k.code}</div>
+          <span class="act-key-badge ${used ? 'used' : 'ok'}">
+            ${used
+              ? '<i data-lucide="x" style="width:10px;height:10px;"></i> Utilisée'
+              : '<i data-lucide="circle" style="width:10px;height:10px;"></i> Disponible'}
+          </span>
+          ${!used ? `<button class="act-copy-btn" onclick="copyKey('${k.code}', this)">
+            <i data-lucide="copy" style="width:13px;height:13px;"></i> Copier
+          </button>` : ''}
         </div>
-        <button type="submit" class="auth-submit" id="submit-btn">
-          Activer
-        </button>
+      `;
+    }).join('');
+    lucide.createIcons();
+  } catch(e) {}
+}
+
+/* ---- Zone activation (conditionnelle selon auth) ---- */
+async function loadAuthZone() {
+  const zone = document.getElementById('act-auth-zone');
+  const { data: { session } } = await sb.auth.getSession();
+
+  if (!session) {
+    // Non connecté
+    zone.innerHTML = `
+      <div class="act-auth-prompt">
+        <p>Copie une clé disponible ci-dessus,<br>puis <strong style="color:var(--color-white)">crée ton compte</strong> pour activer ton accès.</p>
+        <div class="act-auth-btns">
+          <a href="inscription.html" class="act-btn-primary">
+            <i data-lucide="user-plus" style="width:15px;height:15px;"></i> Créer mon compte
+          </a>
+          <a href="connexion.html" class="act-btn-secondary">
+            <i data-lucide="log-in" style="width:15px;height:15px;"></i> Se connecter
+          </a>
+        </div>
+      </div>`;
+    lucide.createIcons();
+    return;
+  }
+
+  // Déjà un accès → dashboard
+  const { data: acces } = await sb
+    .from('acces').select('actif')
+    .eq('user_id', session.user.id).eq('actif', true).maybeSingle();
+  if (acces) { window.location.href = 'dashboard.html'; return; }
+
+  // Formulaire d'activation
+  zone.innerHTML = `
+    <div class="act-form-card">
+      <div class="act-form-title">Active ton accès</div>
+      <p class="act-form-sub">Colle la clé copiée ci-dessus et clique sur Activer.</p>
+      <form id="act-form">
+        <div class="act-input-row">
+          <input id="act-input" class="act-input" type="text" placeholder="FOND-XXXX-XXXX"
+            autocomplete="off" spellcheck="false" required>
+          <button type="submit" class="act-submit" id="act-submit-btn">Activer</button>
+        </div>
       </form>
+    </div>`;
 
-      <p class="auth-link">
-        Tu n'as pas encore de clé ?
-        <a href="https://opdigi.mychariow.shop/prd_du29cl" target="_blank" rel="noopener">Acheter une clé</a>
-      </p>
-    `;
+  document.getElementById('act-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('act-submit-btn');
+    const code = document.getElementById('act-input').value.trim().toUpperCase();
+    btn.disabled = true;
+    btn.textContent = 'Vérification…';
 
-    document.getElementById('activation-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('submit-btn');
-      const cle = document.getElementById('cle').value.trim();
+    try {
+      const { data, error } = await sb.functions.invoke('activer-cle', { body: { code } });
 
-      btn.disabled = true;
-      btn.textContent = 'Vérification…';
-
-      try {
-        const res = await fetch('/api/activer-cle', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`
-          },
-          body: JSON.stringify({ code: cle })
-        });
-        const data = await res.json();
-
-        if (!res.ok) {
-          toast(data.error || 'Clé invalide ou déjà utilisée.', 'error');
-          btn.disabled = false;
-          btn.textContent = 'Activer';
-          return;
-        }
-
-        toast('Accès activé ! Bienvenue sur DÉKOD-IA.', 'success');
-        setTimeout(() => { window.location.href = 'onboarding.html'; }, 1200);
-      } catch {
-        toast('Erreur réseau. Vérifie ta connexion.', 'error');
+      if (error) {
+        let msg = 'Erreur réseau. Vérifie ta connexion et réessaie.';
+        try {
+          // FunctionsHttpError : error.context est la Response brute
+          if (error.context && typeof error.context.json === 'function') {
+            const ctx = await error.context.json();
+            if (ctx?.error) msg = ctx.error;
+          } else if (error.message) {
+            msg = error.message;
+          }
+        } catch {}
+        aToast(msg, 'error');
         btn.disabled = false;
         btn.textContent = 'Activer';
+        return;
       }
-    });
-  })();
+      if (!data?.ok) {
+        aToast(data?.error || 'Erreur inconnue.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Activer';
+        return;
+      }
+
+      // Message personnalisé selon type d'achat
+      const prix = data?.prix_achat || 0;
+      const successMsg = prix > 0
+        ? `Achat enregistré : ${prix.toLocaleString('fr-FR')} FCFA — Accès activé !`
+        : 'Accès fondateur activé ! Bienvenue';
+      aToast(successMsg, 'success');
+      // Rafraîchir les clés pour mettre à jour la barre
+      await loadKeys();
+      setTimeout(() => { window.location.href = 'onboarding.html'; }, 2200);
+
+    } catch {
+      aToast('Erreur réseau. Vérifie ta connexion.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Activer';
+    }
+  });
+  lucide.createIcons();
+}
+
+// Lancer les trois chargements en parallèle
+loadConfig();
+loadKeys();
+loadAuthZone();
 </script>
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<script>lucide.createIcons();</script>
 </body>
 </html>

@@ -6,293 +6,345 @@
   <title>Bienvenue — DÉKOD-IA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    body { overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
-
-    /* ── HEADER ── */
-    .ob-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 32px;
-      flex-shrink: 0;
+    html, body {
+      height: 100%;
+      overflow: hidden;
     }
+    body {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* ── Ambiance fond ── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -160px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 420px;
+      background: radial-gradient(ellipse at center, rgba(232,0,29,0.10) 0%, transparent 68%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Logo ── */
     .ob-logo {
+      position: fixed;
+      top: 26px;
+      left: 32px;
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 700;
-      font-size: 22px;
+      font-size: 21px;
       color: var(--color-white);
+      z-index: 20;
+      letter-spacing: 0.3px;
     }
     .ob-logo span { color: var(--color-red); }
 
-    .ob-prog-wrap {
+    /* ── Dots indicateurs ── */
+    .ob-dots {
+      position: fixed;
+      top: 32px;
+      right: 32px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 7px;
+      z-index: 20;
     }
-    .ob-prog-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--color-text-muted);
-      white-space: nowrap;
-    }
-    .ob-prog-track {
-      width: 120px;
-      height: 4px;
+    .ob-dot {
+      height: 6px;
+      border-radius: 3px;
       background: var(--color-border);
-      border-radius: 99px;
-      overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+      width: 6px;
     }
-    .ob-prog-fill {
-      height: 100%;
-      background: var(--color-red);
-      border-radius: 99px;
-      transition: width 0.4s ease-out;
-    }
+    .ob-dot.active { background: var(--color-red); width: 22px; }
+    .ob-dot.done   { background: rgba(232,0,29,0.35); }
 
-    /* ── SCREEN QUESTION ── */
-    #screen-question {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .ob-main {
+    /* ── Zone principale ── */
+    .ob-stage {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px 24px;
-      overflow-y: auto;
+      padding: 80px 24px 96px;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
     }
 
-    .ob-card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      padding: 36px 40px;
-      max-width: 640px;
+    /* ── Slide ── */
+    .ob-slide {
+      position: absolute;
       width: 100%;
-      animation: cardIn 0.35s ease-out forwards;
+      max-width: 700px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 16px;
+      will-change: transform, opacity;
+      transition: transform 0.42s cubic-bezier(0.4,0,0.2,1),
+                  opacity  0.38s cubic-bezier(0.4,0,0.2,1);
     }
-    @keyframes cardIn {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    .ob-slide[data-state="enter-right"] { transform: translateX(64px);  opacity: 0; }
+    .ob-slide[data-state="enter-left"]  { transform: translateX(-64px); opacity: 0; }
+    .ob-slide[data-state="visible"]     { transform: translateX(0);     opacity: 1; }
+    .ob-slide[data-state="exit-left"]   { transform: translateX(-64px); opacity: 0; }
+    .ob-slide[data-state="exit-right"]  { transform: translateX(64px);  opacity: 0; }
 
-    .ob-q-num {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--color-red);
-      margin-bottom: 10px;
+    /* ── Contenu slide ── */
+    .ob-q-icon {
+      font-size: 52px;
+      line-height: 1;
+      margin-bottom: 20px;
+      display: block;
+      animation: iconPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
     }
-    .ob-q-titre {
-      font-size: clamp(20px, 4vw, 28px);
-      font-weight: 700;
+    @keyframes iconPop {
+      from { transform: scale(0.6); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    .ob-q-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: clamp(26px, 5vw, 44px);
       color: var(--color-white);
-      margin-bottom: 6px;
-      line-height: 1.2;
+      line-height: 1.1;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
     }
-    .ob-q-sub {
+    .ob-q-hint {
       font-size: 14px;
       color: var(--color-text-muted);
-      margin-bottom: 24px;
+      margin-bottom: 32px;
+      font-weight: 400;
     }
 
-    .ob-options {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 10px;
+    /* ── Grille options ── */
+    .ob-opts {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 9px;
+      width: 100%;
     }
-    .ob-option {
-      padding: 12px 16px;
-      background: var(--color-bg);
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--color-text-soft);
-      text-align: left;
+    .ob-opt {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      padding: 16px 18px;
+      min-width: 110px;
+      max-width: 160px;
+      flex: 1 1 110px;
+      background: rgba(26,26,26,0.85);
+      border: 1.5px solid var(--color-border);
+      border-radius: 12px;
       cursor: pointer;
-      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      transition: border-color 0.2s, background 0.2s, transform 0.18s, box-shadow 0.2s;
+      font-family: 'Inter', sans-serif;
+      backdrop-filter: blur(6px);
     }
-    .ob-option:hover { border-color: rgba(232,0,29,0.4); color: var(--color-white); }
-    .ob-option.selected {
+    .ob-opt:hover {
+      border-color: rgba(232,0,29,0.45);
+      background: rgba(232,0,29,0.05);
+      transform: translateY(-2px);
+    }
+    .ob-opt.sel {
       border-color: var(--color-red);
-      background: rgba(232,0,29,0.08);
-      color: var(--color-white);
+      background: rgba(232,0,29,0.09);
+      box-shadow: 0 0 0 1px var(--color-red), 0 6px 24px rgba(232,0,29,0.18);
     }
+    .ob-opt-em  { font-size: 26px; line-height: 1; }
+    .ob-opt-lbl {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      text-align: center;
+      line-height: 1.3;
+    }
+    .ob-opt.sel .ob-opt-lbl { color: var(--color-text-soft); }
 
-    /* ── FOOTER BOUTONS ── */
+    /* ── Options verticales (niveau) ── */
+    .ob-opts.vert {
+      flex-direction: column;
+      align-items: stretch;
+      max-width: 520px;
+    }
+    .ob-opts.vert .ob-opt {
+      flex-direction: row;
+      text-align: left;
+      max-width: 100%;
+      min-width: 0;
+      padding: 15px 20px;
+      gap: 14px;
+      align-items: center;
+    }
+    .ob-opt-body  { flex: 1; }
+    .ob-opt-name  { font-size: 14px; font-weight: 600; color: var(--color-text-soft); margin-bottom: 2px; }
+    .ob-opt-desc  { font-size: 12px; color: var(--color-text-muted); line-height: 1.4; }
+    .ob-opt.sel .ob-opt-name { color: var(--color-white); }
+
+    /* ── Pied de page ── */
     .ob-footer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: 18px 32px 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 32px 28px;
-      flex-shrink: 0;
-      border-top: 1px solid var(--color-border);
+      z-index: 20;
+      background: linear-gradient(to top, #0D0D0D 55%, transparent);
     }
-    .btn-ignorer {
-      font-size: 14px;
+    .ob-skip {
+      font-size: 13.5px;
       color: var(--color-text-muted);
-      padding: 10px 20px;
-      border-radius: 6px;
-      border: 1px solid var(--color-border);
-      background: transparent;
+      font-family: 'Inter', sans-serif;
+      background: none;
+      border: none;
       cursor: pointer;
-      transition: color 0.15s, border-color 0.15s;
+      padding: 8px 4px;
+      transition: color 0.15s;
     }
-    .btn-ignorer:hover { color: var(--color-white); border-color: var(--color-text-muted); }
-
-    .btn-suivant {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--color-white);
-      padding: 11px 28px;
-      border-radius: 6px;
-      background: var(--color-red);
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn-suivant:hover { opacity: 0.88; transform: translateY(-1px); }
-
-    /* ── CÉLÉBRATION ── */
-    #screen-celeb {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: var(--color-bg);
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      z-index: 999;
-      overflow: hidden;
-    }
-
-    #confetti-container {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .confetti-piece {
-      position: absolute;
-      top: -12px;
-      opacity: 0.9;
-      animation: confettiFall linear forwards;
-    }
-    @keyframes confettiFall {
-      0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
-      80%  { opacity: 0.8; }
-      100% { transform: translateY(110vh) rotate(540deg); opacity: 0; }
-    }
-
-    .celeb-inner {
-      position: relative;
-      z-index: 2;
-      animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
-    }
-    @keyframes popIn {
-      from { opacity: 0; transform: scale(0.7); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-    .celeb-emoji {
-      font-size: 72px;
-      line-height: 1;
-      margin-bottom: 24px;
-      display: block;
-      animation: bounce 0.6s ease-out 0.3s both;
-    }
-    @keyframes bounce {
-      0%   { transform: scale(0); }
-      60%  { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-    .celeb-titre {
-      font-size: clamp(28px, 5vw, 52px);
-      font-weight: 700;
-      color: var(--color-white);
-      margin-bottom: 14px;
-    }
-    .celeb-titre span { color: var(--color-red); }
-    .celeb-sub {
-      font-size: 16px;
-      color: var(--color-text-muted);
-      margin-bottom: 36px;
-      line-height: 1.6;
-    }
-    .btn-entrer {
+    .ob-skip:hover { color: var(--color-text-soft); }
+    .ob-next {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      padding: 14px 36px;
+      padding: 13px 30px;
       background: var(--color-red);
       color: var(--color-white);
-      border-radius: 8px;
-      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
       font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
       transition: filter 0.15s, transform 0.15s;
-      animation: fadeUp 0.4s ease-out 0.8s both;
     }
-    .btn-entrer:hover { filter: brightness(1.1); transform: translateY(-2px); }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(10px); }
+    .ob-next:hover   { filter: brightness(1.1); transform: translateY(-1px); }
+    .ob-next:active  { transform: translateY(0); }
+
+    /* ── Écran célébration ── */
+    #ob-celeb {
+      position: fixed;
+      inset: 0;
+      background: var(--color-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s;
+    }
+    #ob-celeb.show { opacity: 1; pointer-events: all; }
+
+    #ob-confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+    .conf-p {
+      position: absolute;
+      top: -16px;
+      animation: cFall linear forwards;
+    }
+    @keyframes cFall {
+      0%   { transform: translateY(0)      rotate(0deg);   opacity: 1; }
+      80%  { opacity: 0.6; }
+      100% { transform: translateY(110vh)  rotate(620deg); opacity: 0; }
+    }
+
+    .celeb-wrap { position: relative; z-index: 2; padding: 24px; }
+    .celeb-icon {
+      font-size: 80px;
+      display: block;
+      margin-bottom: 22px;
+      animation: iconBounce 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+    }
+    @keyframes iconBounce {
+      from { transform: scale(0) rotate(-15deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0deg);   opacity: 1; }
+    }
+    .celeb-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: clamp(36px, 8vw, 68px);
+      color: var(--color-white);
+      line-height: 1.05;
+      margin-bottom: 12px;
+      letter-spacing: -1px;
+    }
+    .celeb-title em { font-style: normal; color: var(--color-red); }
+    .celeb-sub {
+      font-size: 16px;
+      color: var(--color-text-muted);
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+    .celeb-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 40px;
+      background: var(--color-red);
+      color: var(--color-white);
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      transition: filter 0.15s, transform 0.15s;
+      animation: fadeSlideUp 0.45s ease-out 0.7s both;
+    }
+    .celeb-cta:hover { filter: brightness(1.12); transform: translateY(-2px); }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(14px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
+    /* ── Mobile ── */
     @media (max-width: 600px) {
-      .ob-header { padding: 16px 20px; }
-      .ob-footer  { padding: 16px 20px 20px; }
-      .ob-card    { padding: 24px 20px; border-radius: 10px; }
-      .ob-prog-track { width: 80px; }
-      .ob-options { grid-template-columns: 1fr 1fr; }
+      .ob-stage   { padding: 72px 16px 90px; }
+      .ob-footer  { padding: 14px 20px 22px; }
+      .ob-logo    { left: 20px; top: 22px; }
+      .ob-dots    { right: 20px; top: 28px; }
+      .ob-opts    { gap: 7px; }
+      .ob-opt     { min-width: 90px; padding: 13px 12px; }
+      .ob-opt-em  { font-size: 22px; }
+      .ob-opt-lbl { font-size: 11.5px; }
     }
     @media (max-width: 380px) {
-      .ob-options { grid-template-columns: 1fr; }
+      .ob-opts:not(.vert) .ob-opt { min-width: 80px; flex: 1 1 80px; }
     }
   </style>
 </head>
 <body>
 
-<!-- SCREEN QUESTIONS -->
-<div id="screen-question">
+<div class="ob-logo">DÉKOD<span>-IA</span></div>
+<div class="ob-dots" id="ob-dots"></div>
 
-  <header class="ob-header">
-    <div class="ob-logo">DÉKOD<span>-IA</span></div>
-    <div class="ob-prog-wrap">
-      <span class="ob-prog-label" id="ob-prog-label">1 sur 3</span>
-      <div class="ob-prog-track">
-        <div class="ob-prog-fill" id="ob-prog-fill" style="width:33%"></div>
-      </div>
-    </div>
-  </header>
-
-  <div class="ob-main" id="ob-main"></div>
-
-  <footer class="ob-footer">
-    <button class="btn-ignorer" id="btn-ignorer">Ignorer cette question</button>
-    <button class="btn-suivant" id="btn-suivant">Suivant →</button>
-  </footer>
-
+<div class="ob-stage" id="ob-stage">
+  <!-- slides injectés par JS -->
 </div>
 
-<!-- SCREEN CÉLÉBRATION -->
-<div id="screen-celeb">
-  <div id="confetti-container"></div>
-  <div class="celeb-inner">
-    <span class="celeb-emoji">🎉</span>
-    <h1 class="celeb-titre">Bienvenue dans<br><span>DÉKOD-IA</span> !</h1>
-    <p class="celeb-sub">Ton guide t'attend.<br>Bonne lecture et bon lancement.</p>
-    <a href="dashboard.html" class="btn-entrer">Accéder au guide →</a>
+<div class="ob-footer">
+  <button class="ob-skip" id="ob-skip">Passer cette question</button>
+  <button class="ob-next" id="ob-next">Suivant →</button>
+</div>
+
+<div id="ob-celeb">
+  <div id="ob-confetti"></div>
+  <div class="celeb-wrap">
+    <span class="celeb-icon">🚀</span>
+    <h1 class="celeb-title">T'es dans<br>la <em>bonne place.</em></h1>
+    <p class="celeb-sub">Ton guide est prêt.<br>Commence au chapitre 1 — et ne t'arrête plus.</p>
+    <a href="dashboard.html" class="celeb-cta">Accéder au guide →</a>
   </div>
 </div>
 
@@ -302,140 +354,207 @@
 <script src="js/auth.js"></script>
 <script>
 (async () => {
-
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { window.location.href = 'connexion.html'; return; }
 
-  // Déjà fait → dashboard direct
   const { data: profile } = await sb
     .from('profiles').select('onboarding_done').eq('id', session.user.id).single();
   if (profile?.onboarding_done) { window.location.href = 'dashboard.html'; return; }
 
-  // ── Définition des questions ─────────────────────────────────────────────────
-  const QUESTIONS = [
+  /* ── Questions ─────────────────────────────────────────────────────────── */
+  const QS = [
     {
       id: 'decouverte',
-      label: 'Comment as-tu découvert DÉKOD-IA ?',
-      sub: 'Ça nous aide à mieux te rejoindre.',
-      options: ['YouTube', 'TikTok', 'Instagram', 'Twitter / X', 'Bouche à oreille', 'Google / Recherche', 'Autre']
+      icon: '👀',
+      title: 'Comment tu nous as trouvés ?',
+      hint: 'Ça nous aide à mieux atteindre les bonnes personnes.',
+      type: 'grid',
+      opts: [
+        { em:'▶️', lbl:'YouTube'           },
+        { em:'🎵', lbl:'TikTok'            },
+        { em:'📸', lbl:'Instagram'         },
+        { em:'🐦', lbl:'Twitter / X'       },
+        { em:'🗣️', lbl:'Bouche à oreille'  },
+        { em:'🔍', lbl:'Google'            },
+        { em:'💬', lbl:'WhatsApp / Telegram'},
+        { em:'✨', lbl:'Autre'             }
+      ]
     },
     {
       id: 'objectif',
-      label: 'Quel est ton objectif principal ?',
-      sub: 'On veut t\'aider à l\'atteindre.',
-      options: ['Lancer un SaaS', 'Apprendre le vibe-coding', 'Trouver un emploi tech', 'Générer des revenus en ligne', 'Progresser en développement', 'Autre']
+      icon: '🎯',
+      title: 'C\'est quoi ton objectif principal ?',
+      hint: 'On adapte les recommandations à ce que tu veux vraiment.',
+      type: 'grid',
+      opts: [
+        { em:'🚀', lbl:'Lancer un SaaS'       },
+        { em:'💰', lbl:'Générer des revenus'   },
+        { em:'📚', lbl:'Apprendre le code IA'  },
+        { em:'💼', lbl:'Trouver un emploi tech'},
+        { em:'⚡', lbl:'Coder plus vite'       },
+        { em:'🌍', lbl:'Autre'                 }
+      ]
     },
     {
       id: 'niveau',
-      label: 'Quel est ton niveau en développement ?',
-      sub: 'Pas de jugement — on part d\'où tu en es.',
-      options: ['Zéro code (débutant complet)', 'Quelques bases (HTML/CSS)', 'Dev junior', 'Dev expérimenté']
+      icon: '💪',
+      title: 'Ton niveau en développement ?',
+      hint: 'Pas de jugement — on part exactement d\'où tu en es.',
+      type: 'vert',
+      opts: [
+        { em:'🌱', lbl:'Zéro code',      desc:'Je n\'ai jamais écrit une ligne de code' },
+        { em:'🌿', lbl:'Quelques bases', desc:'J\'ai touché HTML/CSS ou des tutoriels'   },
+        { em:'🌳', lbl:'Dev junior',     desc:'J\'ai des projets mais manque d\'expérience' },
+        { em:'🎯', lbl:'Dev confirmé',   desc:'Je code régulièrement — je veux aller plus vite' }
+      ]
     }
   ];
 
   let step = 0;
   let selected = null;
+  let busy = false;
   const answers = {};
 
-  // ── Render question ──────────────────────────────────────────────────────────
-  function renderStep(i) {
-    selected = null;
-    const q = QUESTIONS[i];
-    const total = QUESTIONS.length;
-    const isLast = i === total - 1;
-
-    document.getElementById('ob-prog-label').textContent = `${i + 1} sur ${total}`;
-    document.getElementById('ob-prog-fill').style.width = `${((i + 1) / total) * 100}%`;
-    document.getElementById('btn-suivant').textContent = isLast ? 'Terminer ✓' : 'Suivant →';
-
-    document.getElementById('ob-main').innerHTML = `
-      <div class="ob-card">
-        <p class="ob-q-num">Question ${i + 1} sur ${total}</p>
-        <h2 class="ob-q-titre">${q.label}</h2>
-        <p class="ob-q-sub">${q.sub}</p>
-        <div class="ob-options">
-          ${q.options.map(opt => `
-            <button class="ob-option" onclick="pickOption(this, '${opt.replace(/'/g, "\\'")}')">
-              ${opt}
-            </button>
-          `).join('')}
-        </div>
-      </div>`;
+  /* ── Dots ── */
+  function renderDots() {
+    document.getElementById('ob-dots').innerHTML = QS.map((_,i) =>
+      `<div class="ob-dot ${i < step ? 'done' : i === step ? 'active' : ''}"></div>`
+    ).join('');
   }
 
-  window.pickOption = function(btn, value) {
-    document.querySelectorAll('.ob-option').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    selected = value;
-  };
+  /* ── Construire un slide ── */
+  function buildSlide(q) {
+    const isVert = q.type === 'vert';
+    const optsHTML = q.opts.map(o =>
+      isVert
+        ? `<button class="ob-opt" data-val="${o.lbl}">
+             <span class="ob-opt-em">${o.em}</span>
+             <span class="ob-opt-body">
+               <span class="ob-opt-name">${o.lbl}</span>
+               <span class="ob-opt-desc">${o.desc||''}</span>
+             </span>
+           </button>`
+        : `<button class="ob-opt" data-val="${o.lbl}">
+             <span class="ob-opt-em">${o.em}</span>
+             <span class="ob-opt-lbl">${o.lbl}</span>
+           </button>`
+    ).join('');
 
-  // ── Avancer ─────────────────────────────────────────────────────────────────
-  async function advance(save) {
-    if (save && selected) {
-      answers[QUESTIONS[step].id] = { label: QUESTIONS[step].label, value: selected };
+    const div = document.createElement('div');
+    div.className = 'ob-slide';
+    div.setAttribute('data-state', 'enter-right');
+    div.innerHTML = `
+      <span class="ob-q-icon">${q.icon}</span>
+      <h2 class="ob-q-title">${q.title}</h2>
+      <p class="ob-q-hint">${q.hint}</p>
+      <div class="ob-opts${isVert ? ' vert' : ''}">${optsHTML}</div>
+    `;
+
+    div.querySelectorAll('.ob-opt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        div.querySelectorAll('.ob-opt').forEach(b => b.classList.remove('sel'));
+        btn.classList.add('sel');
+        selected = btn.dataset.val;
+      });
+    });
+    return div;
+  }
+
+  /* ── Afficher un step ── */
+  function showStep(idx, dir) {
+    renderDots();
+    selected = null;
+    const stage = document.getElementById('ob-stage');
+    const oldSlide = stage.querySelector('.ob-slide');
+    const newSlide = buildSlide(QS[idx]);
+
+    newSlide.setAttribute('data-state', dir > 0 ? 'enter-right' : 'enter-left');
+    stage.appendChild(newSlide);
+
+    // Kick animation on old
+    if (oldSlide) {
+      oldSlide.setAttribute('data-state', dir > 0 ? 'exit-left' : 'exit-right');
+      setTimeout(() => oldSlide.remove(), 450);
     }
+
+    // Trigger transition on new
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      newSlide.setAttribute('data-state', 'visible');
+      setTimeout(() => { busy = false; }, 460);
+    }));
+
+    const isLast = idx === QS.length - 1;
+    document.getElementById('ob-next').textContent = isLast ? 'Terminer ✓' : 'Suivant →';
+  }
+
+  /* ── Avancer ── */
+  async function advance(skip) {
+    if (busy) return;
+    busy = true;
+    if (!skip && selected) answers[QS[step].id] = selected;
     step++;
-    if (step < QUESTIONS.length) {
-      renderStep(step);
+    if (step < QS.length) {
+      showStep(step, 1);
     } else {
       await finish();
     }
   }
 
-  // ── Finaliser ────────────────────────────────────────────────────────────────
+  /* ── Terminer ── */
   async function finish() {
-    // Sauvegarder les réponses
-    const inserts = Object.entries(answers).map(([qId, a]) => ({
+    const inserts = Object.entries(answers).map(([qId, val]) => ({
       user_id: session.user.id,
       question_id: qId,
-      question_label: a.label,
-      reponse: a.value
+      question_label: QS.find(q => q.id === qId)?.title || qId,
+      reponse: val
     }));
     if (inserts.length > 0) {
-      await sb.from('onboarding_reponses').upsert(inserts, { onConflict: 'user_id,question_id' });
+      try {
+        await sb.from('onboarding_reponses').upsert(inserts, { onConflict: 'user_id,question_id' });
+      } catch {}
     }
-    // Marquer onboarding terminé
-    await sb.from('profiles').update({ onboarding_done: true }).eq('id', session.user.id);
-    // Lancer la célébration
+    const { error } = await sb.from('profiles').update({ onboarding_done: true }).eq('id', session.user.id);
+    if (error) { toast('Erreur réseau. Réessaie.', 'error'); busy = false; return; }
     showCeleb();
   }
 
-  // ── Célébration ──────────────────────────────────────────────────────────────
+  /* ── Célébration ── */
   function showCeleb() {
-    document.getElementById('screen-question').style.display = 'none';
-    const celeb = document.getElementById('screen-celeb');
-    celeb.style.display = 'flex';
+    document.getElementById('ob-stage').style.display = 'none';
+    document.querySelector('.ob-footer').style.display = 'none';
+    document.getElementById('ob-dots').style.display = 'none';
+    document.querySelector('.ob-logo').style.display = 'none';
+    const celeb = document.getElementById('ob-celeb');
+    celeb.classList.add('show');
     launchConfetti();
   }
 
   function launchConfetti() {
-    const colors = ['#E8001D', '#FFFFFF', '#f59e0b', '#22c55e', '#3b82f6', '#a855f7'];
-    const container = document.getElementById('confetti-container');
-    const shapes = ['50%', '2px', '50%'];
-
-    for (let i = 0; i < 120; i++) {
+    const colors = ['#E8001D','#fff','#f59e0b','#22c55e','#3b82f6','#a855f7','#ec4899'];
+    const shapes = ['50%','0','3px'];
+    const c = document.getElementById('ob-confetti');
+    for (let i = 0; i < 150; i++) {
       const el = document.createElement('div');
-      el.className = 'confetti-piece';
-      const size = 5 + Math.random() * 9;
+      el.className = 'conf-p';
+      const size = 5 + Math.random() * 10;
       el.style.cssText = [
-        `left:${Math.random() * 100}%`,
-        `background:${colors[Math.floor(Math.random() * colors.length)]}`,
-        `animation-delay:${Math.random() * 1.2}s`,
-        `animation-duration:${1.2 + Math.random() * 1.2}s`,
+        `left:${(Math.random()*100).toFixed(1)}%`,
+        `background:${colors[Math.floor(Math.random()*colors.length)]}`,
         `width:${size}px`,
-        `height:${size}px`,
-        `border-radius:${shapes[Math.floor(Math.random() * shapes.length)]}`
+        `height:${(size + Math.random()*10).toFixed(1)}px`,
+        `border-radius:${shapes[Math.floor(Math.random()*shapes.length)]}`,
+        `animation-delay:${(Math.random()*1.6).toFixed(2)}s`,
+        `animation-duration:${(1.3+Math.random()*1.4).toFixed(2)}s`
       ].join(';');
-      container.appendChild(el);
+      c.appendChild(el);
     }
   }
 
-  // ── Listeners ────────────────────────────────────────────────────────────────
-  document.getElementById('btn-suivant').addEventListener('click', () => advance(true));
-  document.getElementById('btn-ignorer').addEventListener('click', () => advance(false));
+  document.getElementById('ob-next').addEventListener('click', () => advance(false));
+  document.getElementById('ob-skip').addEventListener('click', () => advance(true));
 
-  // Init
-  renderStep(0);
+  busy = true;
+  showStep(0, 1);
 })();
 </script>
 </body>

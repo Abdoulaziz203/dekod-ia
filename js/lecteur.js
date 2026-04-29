@@ -97,9 +97,20 @@ async function loadChapitre(chapId, animate = true) {
   // Boutons nav
   const prevChap = allChapitres[idx - 1];
   const nextChap = allChapitres[idx + 1];
+  const isLast   = !nextChap;
   document.getElementById('btn-prev').disabled = !prevChap;
   document.getElementById('btn-next').disabled = false;
   document.getElementById('btn-next').dataset.nextId = nextChap?.id || '';
+
+  // Dernier chapitre → changer le label du bouton Suivant
+  const btnNext = document.getElementById('btn-next');
+  if (isLast) {
+    btnNext.innerHTML = '<i data-lucide="trophy"></i> Terminer le guide';
+    btnNext.classList.add('nav-btn-finish');
+  } else {
+    btnNext.innerHTML = 'Suivant <i data-lucide="arrow-right"></i>';
+    btnNext.classList.remove('nav-btn-finish');
+  }
 
   // Bouton marquer lu
   updateMarquerBtn(lusSet.has(chapId));
@@ -166,7 +177,21 @@ async function marquerLu(chapId) {
       el.innerHTML = '<i data-lucide="check"></i>';
     });
     lucide.createIcons();
+
+    // Tous les chapitres lus → félicitation
+    if (lusSet.size === total) {
+      showCompletionModal(total);
+    }
   }
+}
+
+function showCompletionModal(total) {
+  const overlay = document.getElementById('completion-overlay');
+  const countEl = document.getElementById('completion-count');
+  if (!overlay) return;
+  if (countEl) countEl.textContent = `${total} chapitre${total > 1 ? 's' : ''}`;
+  overlay.style.display = 'flex';
+  lucide.createIcons();
 }
 
 function renderSidebar() {
@@ -254,7 +279,12 @@ document.getElementById('btn-prev').addEventListener('click', () => {
 document.getElementById('btn-next').addEventListener('click', async () => {
   await marquerLu(currentChapId);
   const nextId = document.getElementById('btn-next').dataset.nextId;
-  if (nextId) loadChapitre(nextId, true);
+  if (nextId) {
+    loadChapitre(nextId, true);
+  } else {
+    // Dernier chapitre : si déjà tout lu (marquerLu n'a pas déclenché le modal car déjà dans lusSet)
+    showCompletionModal(allChapitres.length);
+  }
 });
 
 document.getElementById('btn-marquer').addEventListener('click', () => {

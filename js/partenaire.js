@@ -60,8 +60,11 @@
   const isServé    = window.location.protocol.startsWith('http');
   const lienRef    = isServé ? `${window.location.origin}/?ref=${code}` : null;
 
-  const prixActuel  = configRow?.prix_actuel || 0;
-  const estGratuit  = configRow?.est_gratuit ?? true;
+  const prixActuel   = configRow?.prix_actuel || 0;
+  // Lien partenaire désactivé UNIQUEMENT si aucun prix n'est défini (< 600 FCFA).
+  // Avec le nouveau système, les clés payantes ont leur propre prix sur la clé
+  // donc tant qu'un prix de référence existe en config, le programme est actif.
+  const estGratuit   = !prixActuel || prixActuel < 600;
   const gainParVente = Math.round(prixActuel * 0.35);
 
   // Charger visiteurs, filleuls inscrits, commissions en parallèle
@@ -175,7 +178,9 @@
 
     <!-- Mes clients (acheteurs avec commissions) -->
     <div class="ventes-wrap">
-      <p class="code-label" style="margin-bottom:14px;">Mes clients</p>
+      <div class="ventes-header">
+        <p class="code-label">Mes clients <span style="font-size:11px;font-weight:400;opacity:0.6;">(acheteurs)</span></p>
+      </div>
       ${commList.length === 0
         ? `<div class="ventes-empty">
              <i data-lucide="inbox"></i>
@@ -188,7 +193,7 @@
                  <th>Email</th>
                  <th>Prix payé</th>
                  <th>Commission (35%)</th>
-                 <th>Statut paiement</th>
+                 <th>Statut</th>
                  <th>Date</th>
                </tr>
              </thead>
@@ -196,15 +201,15 @@
                ${buildToggleRows(commList, c => {
                  const user = c.acces?.profiles || {};
                  return `<tr>
-                   <td class="name">${user.prenom || '—'}</td>
-                   <td class="muted">${user.email || '—'}</td>
-                   <td class="muted">${c.montant_vente} FCFA</td>
-                   <td class="muted" style="color:#22c55e;">${c.montant_commission} FCFA</td>
-                   <td>${c.statut === 'payé'
+                   <td class="name" data-label="Nom">${user.prenom || '—'}</td>
+                   <td class="muted" data-label="Email" style="word-break:break-all;">${user.email || '—'}</td>
+                   <td class="muted" data-label="Prix payé">${c.montant_vente.toLocaleString('fr-FR')} FCFA</td>
+                   <td class="muted" data-label="Commission" style="color:#22c55e;">${c.montant_commission.toLocaleString('fr-FR')} FCFA</td>
+                   <td data-label="Statut">${c.statut === 'payé'
                      ? '<span class="badge-statut badge-paye"><i data-lucide="check-circle"></i> Payé</span>'
                      : '<span class="badge-statut badge-attente"><i data-lucide="clock"></i> En attente</span>'}
                    </td>
-                   <td class="muted">${formatDate(c.created_at)}</td>
+                   <td class="muted" data-label="Date">${formatDate(c.created_at)}</td>
                  </tr>`;
                }, 6)}
              </tbody>
@@ -214,7 +219,9 @@
 
     <!-- Liste des filleuls inscrits -->
     <div class="ventes-wrap">
-      <p class="code-label" style="margin-bottom:14px;">Tous les inscrits via ton lien</p>
+      <div class="ventes-header">
+        <p class="code-label">Tous mes inscrits <span style="font-size:11px;font-weight:400;opacity:0.6;">(via ton lien)</span></p>
+      </div>
       ${liste.length === 0
         ? `<div class="ventes-empty">
              <i data-lucide="inbox"></i>
@@ -225,17 +232,17 @@
                <tr>
                  <th>Nom</th>
                  <th>Email</th>
-                 <th>Date inscription</th>
+                 <th>Inscription</th>
                  <th>Statut</th>
                </tr>
              </thead>
              <tbody>
                ${buildToggleRows(liste, u => `
                  <tr>
-                   <td class="name">${u.prenom || '—'}</td>
-                   <td class="muted">${u.email || '—'}</td>
-                   <td class="muted">${formatDate(u.created_at)}</td>
-                   <td>${acheteurIds.has(u.id)
+                   <td class="name" data-label="Nom">${u.prenom || '—'}</td>
+                   <td class="muted" data-label="Email" style="word-break:break-all;">${u.email || '—'}</td>
+                   <td class="muted" data-label="Inscription">${formatDate(u.created_at)}</td>
+                   <td data-label="Statut">${acheteurIds.has(u.id)
                      ? '<span class="badge-statut badge-paye"><i data-lucide="key"></i> Acheteur</span>'
                      : '<span class="badge-statut badge-attente"><i data-lucide="clock"></i> Inscrit</span>'
                    }</td>

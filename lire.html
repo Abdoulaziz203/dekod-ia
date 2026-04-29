@@ -17,7 +17,7 @@
   <a href="dashboard.html" class="lecteur-back">
     <i data-lucide="arrow-left"></i> Tableau de bord
   </a>
-  <div class="lecteur-logo">DÉKOD<span>-IA</span></div>
+  <div class="lecteur-logo"><img src="assets/images/Logo.png" alt="DÉKOD-IA" class="logo-img"></div>
   <div class="lecteur-progress">
     <button class="btn-sommaire" id="btn-sommaire">
       <i data-lucide="list"></i> Sommaire
@@ -63,6 +63,23 @@
     Suivant <i data-lucide="arrow-right"></i>
   </button>
 </footer>
+
+<!-- MODAL FÉLICITATION FIN DU GUIDE -->
+<div class="completion-overlay" id="completion-overlay" style="display:none">
+  <div class="completion-modal">
+    <div class="completion-icon"><i data-lucide="trophy"></i></div>
+    <h2 class="completion-title">Guide complété !</h2>
+    <p class="completion-sub">Tu as lu les <strong id="completion-count">—</strong> chapitres du guide.<br>Ton avis nous aide à nous améliorer — et il apparaît sur la page d'accueil.</p>
+    <div class="completion-actions">
+      <a href="dashboard.html#commentaire-section" class="completion-btn-primary">
+        <i data-lucide="star"></i> Laisser mon avis
+      </a>
+      <a href="dashboard.html" class="completion-btn-secondary">
+        Retour au tableau de bord
+      </a>
+    </div>
+  </div>
+</div>
 
 <!-- MOBILE SIDEBAR OVERLAY -->
 <div class="sidebar-overlay" id="sidebar-overlay"></div>

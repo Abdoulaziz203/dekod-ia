@@ -13,20 +13,27 @@
 <body>
 
 <header class="dash-header">
-  <div class="dash-logo">DÉKOD<span>-IA</span></div>
+  <div class="dash-logo"><img src="assets/images/Logo.png" alt="DÉKOD-IA" class="logo-img"></div>
   <div class="dash-user">
+    <span class="dash-prenom" id="user-prenom"></span>
     <div class="dash-avatar" id="dash-avatar" title="Changer ma photo de profil">
       <div class="dash-avatar-default"><i data-lucide="user"></i></div>
       <input type="file" id="avatar-input" accept="image/jpeg,image/png,image/webp" style="display:none">
     </div>
-    <span id="user-prenom"></span>
     <button class="dash-signout" onclick="signOut()">
-      <i data-lucide="log-out"></i> Déconnexion
+      <i data-lucide="log-out"></i> <span>Déconnexion</span>
     </button>
   </div>
 </header>
 
 <main class="dash-main page-enter">
+
+  <!-- Accueil -->
+  <div class="dash-welcome" id="dash-welcome" style="display:none">
+    <p class="dash-welcome-hello">Bonjour,</p>
+    <h1 class="dash-welcome-name" id="dash-welcome-name">—</h1>
+    <div class="dash-access-info" id="dash-access-info"></div>
+  </div>
 
   <!-- Bloc progression -->
   <div class="progress-card skeleton" id="progress-card" style="min-height:160px"></div>

@@ -25,15 +25,15 @@
 .lecteur-back svg { width: 16px; height: 16px; }
 
 .lecteur-logo {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 700;
-  font-size: 20px;
-  color: var(--color-white);
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  align-items: center;
 }
-.lecteur-logo span { color: var(--color-red); }
+.lecteur-logo .logo-img {
+  height: 26px;
+}
 
 .lecteur-progress {
   display: flex;
@@ -280,6 +280,19 @@
 .nav-marquer:hover { color: var(--color-white); border-color: var(--color-white); }
 .nav-marquer.lu { color: #22c55e; border-color: #22c55e; }
 .nav-marquer svg { width: 15px; height: 15px; }
+
+/* Bouton "Terminer le guide" (dernier chapitre) */
+.nav-btn-finish {
+  background: var(--color-red);
+  border-color: var(--color-red);
+  color: var(--color-white);
+  box-shadow: 0 4px 16px rgba(232, 0, 29, 0.3);
+}
+.nav-btn-finish:hover {
+  background: var(--color-red);
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
 
 /* ===== MOBILE SOMMAIRE OVERLAY ===== */
 .btn-sommaire {
@@ -950,4 +963,123 @@ p.callout-body {
   .content-table { font-size: 13px; }
   .content-table thead th,
   .content-table tbody td { padding: 8px 10px; }
+}
+
+/* ===== MODAL FIN DE GUIDE ===== */
+.completion-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.completion-modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 48px 40px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+  animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ligne rouge décorative en haut */
+.completion-modal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 32px; right: 32px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-red), transparent);
+  border-radius: 0 0 2px 2px;
+}
+
+.completion-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(232, 0, 29, 0.1);
+  border: 1px solid rgba(232, 0, 29, 0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  color: var(--color-red);
+}
+.completion-icon svg { width: 28px; height: 28px; }
+
+.completion-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--color-white);
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+
+.completion-sub {
+  font-size: 15px;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+  margin-bottom: 32px;
+}
+.completion-sub strong { color: var(--color-text-soft); }
+
+.completion-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.completion-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: var(--color-red);
+  color: var(--color-white);
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.15s;
+  box-shadow: 0 4px 20px rgba(232, 0, 29, 0.3);
+}
+.completion-btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.completion-btn-primary svg { width: 16px; height: 16px; }
+
+.completion-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+.completion-btn-secondary:hover { color: var(--color-white); border-color: var(--color-border); }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 480px) {
+  .completion-modal { padding: 36px 24px; }
+  .completion-title { font-size: 28px; }
 }

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conditions d'utilisation — DÉKOD-IA</title>
+  <meta name="description" content="Conditions générales d'utilisation, politique de confidentialité et mentions légales de DÉKOD-IA.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      background: var(--color-bg);
+      color: var(--color-text-soft);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .legal-header {
+      position: sticky;
+      top: 0;
+      background: rgba(13,13,13,0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--color-border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 50;
+    }
+    .legal-header-logo img { height: 30px; width: auto; display: block; }
+    .legal-header-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      color: var(--color-text-soft);
+      font-size: 13px;
+      font-weight: 500;
+      transition: border-color 150ms, color 150ms;
+    }
+    .legal-header-back:hover {
+      border-color: var(--color-white);
+      color: var(--color-white);
+    }
+    .legal-header-back svg { width: 14px; height: 14px; }
+
+    /* Layout */
+    .legal-wrap {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 60px 24px 100px;
+    }
+
+    .legal-intro {
+      text-align: center;
+      margin-bottom: 56px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .legal-eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--color-red);
+      margin-bottom: 14px;
+    }
+    .legal-intro h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(36px, 6vw, 56px);
+      font-weight: 700;
+      color: var(--color-white);
+      letter-spacing: -0.5px;
+      line-height: 1.05;
+      margin-bottom: 18px;
+    }
+    .legal-intro p {
+      font-size: 15px;
+      color: var(--color-text-muted);
+      line-height: 1.7;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+    .legal-update {
+      display: inline-block;
+      margin-top: 22px;
+      font-size: 12px;
+      color: var(--color-text-muted);
+      padding: 5px 14px;
+      border: 1px solid var(--color-border);
+      border-radius: 99px;
+    }
+
+    /* Onglets */
+    .legal-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 6px;
+      margin-bottom: 40px;
+      overflow-x: auto;
+    }
+    .legal-tab {
+      flex: 1;
+      min-width: 130px;
+      padding: 11px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 150ms, color 150ms;
+    }
+    .legal-tab:hover { color: var(--color-text-soft); }
+    .legal-tab.active {
+      background: var(--color-bg);
+      color: var(--color-white);
+      box-shadow: 0 1px 0 var(--color-border);
+    }
+
+    /* Contenu */
+    .legal-section { display: none; animation: fadeIn 250ms ease; }
+    .legal-section.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .legal-section h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--color-white);
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+    .legal-section > p:first-of-type {
+      color: var(--color-text-muted);
+      font-size: 14px;
+      margin-bottom: 36px;
+    }
+
+    .legal-block {
+      margin-bottom: 36px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .legal-block:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .legal-block h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--color-white);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .legal-block h3-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background: rgba(232,0,29,0.1);
+      color: var(--color-red);
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .legal-block p, .legal-block li {
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--color-text-soft);
+      margin-bottom: 12px;
+    }
+    .legal-block ul {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 12px;
+    }
+    .legal-block ul li {
+      position: relative;
+      padding-left: 22px;
+      margin-bottom: 8px;
+    }
+    .legal-block ul li::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 11px;
+      width: 5px;
+      height: 5px;
+      background: var(--color-red);
+      border-radius: 50%;
+    }
+    .legal-block strong { color: var(--color-white); font-weight: 600; }
+    .legal-block a {
+      color: var(--color-red);
+      text-decoration: underline;
+      text-decoration-color: rgba(232,0,29,0.4);
+      text-underline-offset: 3px;
+      transition: text-decoration-color 150ms;
+    }
+    .legal-block a:hover { text-decoration-color: var(--color-red); }
+
+    .legal-callout {
+      background: var(--color-surface);
+      border-left: 3px solid var(--color-red);
+      padding: 18px 22px;
+      border-radius: 6px;
+      margin: 18px 0;
+    }
+    .legal-callout p { margin-bottom: 0; font-size: 14px; }
+
+    .legal-contact-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+      margin-top: 48px;
+    }
+    .legal-contact-card h3 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-white);
+      margin-bottom: 8px;
+    }
+    .legal-contact-card p { color: var(--color-text-muted); font-size: 14px; margin-bottom: 16px; }
+    .legal-contact-card a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--color-red);
+      color: var(--color-white);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: filter 150ms;
+    }
+    .legal-contact-card a:hover { filter: brightness(1.1); }
+
+    @media (max-width: 640px) {
+      .legal-wrap { padding: 40px 18px 60px; }
+      .legal-tabs { flex-direction: column; }
+      .legal-tab { min-width: auto; }
+      .legal-section h2 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="legal-header">
+  <a href="index.html" class="legal-header-logo">
+    <img src="assets/images/Logo.png" alt="DÉKOD-IA">
+  </a>
+  <a href="index.html" class="legal-header-back">
+    <i data-lucide="arrow-left"></i> Retour
+  </a>
+</header>
+
+<div class="legal-wrap page-enter">
+
+  <div class="legal-intro">
+    <p class="legal-eyebrow">Cadre légal</p>
+    <h1>Tout est clair, rien n'est caché.</h1>
+    <p>Nos engagements, ce que tu acceptes en utilisant la plateforme, et comment tes données sont traitées. Écrit sans jargon, en français accessible.</p>
+    <span class="legal-update">Dernière mise à jour : 29 avril 2026</span>
+  </div>
+
+  <div class="legal-tabs" role="tablist">
+    <button class="legal-tab active" data-tab="cgu" role="tab">Conditions d'utilisation</button>
+    <button class="legal-tab" data-tab="confidentialite" role="tab">Confidentialité</button>
+    <button class="legal-tab" data-tab="mentions" role="tab">Mentions légales</button>
+  </div>
+
+  <!-- ============ CGU ============ -->
+  <section class="legal-section active" id="tab-cgu">
+    <h2>Conditions générales d'utilisation</h2>
+    <p>En accédant à DÉKOD-IA et en créant un compte, tu acceptes les conditions ci-dessous. Si tu n'es pas d'accord, n'utilise pas le service.</p>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">1</span> Objet du service</h3>
+      <p>DÉKOD-IA est une plateforme web qui distribue un guide pédagogique numérique : <strong>« De zéro à ton premier SaaS avec Claude Code »</strong>. Le contenu du guide (5 parties, 17 chapitres) est lu en ligne, dans l'application. Aucun téléchargement ni copie hors-ligne n'est proposé.</p>
+      <p>Le service inclut également :</p>
+      <ul>
+        <li>Un suivi personnel de progression chapitre par chapitre</li>
+        <li>Un programme partenaire avec commission sur les ventes générées</li>
+        <li>Un système d'activation par clé personnelle</li>
+      </ul>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">2</span> Création de compte</h3>
+      <p>Pour accéder au guide, tu dois créer un compte avec une adresse email valide et un mot de passe d'au moins 8 caractères. Tu es seul responsable de la confidentialité de ton mot de passe.</p>
+      <p>Tu t'engages à fournir des informations exactes et à les mettre à jour si elles changent. Un compte = une personne. Le partage de compte est interdit.</p>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">3</span> Activation par clé</h3>
+      <p>L'accès au guide se fait via une <strong>clé d'activation</strong>. Deux types de clés existent :</p>
+      <ul>
+        <li><strong>Clés fondateurs (gratuites)</strong> — distribuées en quantité limitée, visibles publiquement sur la page d'activation tant que des places sont disponibles. Une clé fondateur donne un accès complet au guide pour 10 ans.</li>
+        <li><strong>Clés payantes</strong> — vendues au prix affiché au moment de l'achat. Le montant de l'achat est inscrit sur la clé et reste lié à elle.</li>
+      </ul>
+      <p>Une clé est <strong>nominative</strong> : elle ne peut être utilisée qu'une seule fois. Une fois activée, elle est liée à ton compte de façon définitive.</p>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">4</span> Paiement et remboursement</h3>
+      <p>Les paiements sont traités via <strong>CinetPay</strong> (Wave, Orange Money, carte bancaire, Mobile Money). Aucune donnée bancaire n'est stockée sur nos serveurs.</p>
+      <div class="legal-callout">
+        <p><strong>Politique de remboursement :</strong> compte tenu de la nature numérique du produit (livraison instantanée, contenu accessible immédiatement après activation), <strong>aucun remboursement n'est possible</strong> une fois la clé activée. Cette règle est conforme à l'article 16 de la directive européenne 2011/83/UE et aux pratiques standards des produits digitaux.</p>
+      </div>
+      <p>Si la clé n'a pas encore été activée et que tu rencontres un problème technique, écris-nous à <a href="mailto:contact@dekod-ia.com">contact@dekod-ia.com</a> sous 7 jours après l'achat — nous étudions les cas au cas par cas.</p>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">5</span> Propriété intellectuelle</h3>
+      <p>Tout le contenu du guide (textes, images, schémas, exemples de code, structure pédagogique) est la <strong>propriété exclusive de DÉKOD-IA</strong> et de son auteur. Il est protégé par le droit d'auteur.</p>
+      <p>Tu obtiens un <strong>droit d'usage personnel</strong> du contenu pour ton apprentissage. Tu peux appliquer les méthodes apprises pour construire <strong>tes propres projets</strong>, à des fins personnelles ou commerciales, sans aucune restriction.</p>
+      <p>En revanche, sont interdits :</p>
+      <ul>
+        <li>La reproduction, la copie, la diffusion ou la publication du contenu du guide (en partie ou en totalité), sur quelque support que ce soit</li>
+        <li>La revente, le partage ou le don de ta clé d'activation à un tiers</li>
+        <li>L'utilisation d'outils automatisés pour extraire ou archiver le contenu</li>
+        <li>La création d'œuvres dérivées (résumés publics, traductions, adaptations) sans autorisation écrite</li>
+      </ul>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">6</span> Programme partenaire</h3>
+      <p>Toute personne peut postuler pour devenir <strong>partenaire</strong>. La candidature est validée manuellement par notre équipe. Une fois validé, le partenaire reçoit un code unique et un lien d'affiliation.</p>
+      <p>Pour chaque <strong>vente effective</strong> (clé payante activée par une personne inscrite via le lien partenaire), le partenaire touche une <strong>commission de 35%</strong> du prix payé.</p>
+      <ul>
+        <li>Les commissions sont enregistrées en temps réel et visibles dans le tableau de bord partenaire</li>
+        <li>Le paiement est effectué manuellement par virement (Wave, Orange Money, ou autre) sur demande, à partir de 5 000 FCFA cumulés</li>
+        <li>Les inscriptions gratuites (clés fondateurs) ne génèrent <strong>aucune commission</strong></li>
+        <li>Tout comportement frauduleux (auto-affiliation, achats fictifs, spam) entraîne la suspension immédiate du compte partenaire et l'annulation des commissions</li>
+      </ul>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">7</span> Comportement attendu</h3>
+      <p>Tu t'engages à utiliser la plateforme de manière respectueuse. Sont interdits notamment :</p>
+      <ul>
+        <li>Toute tentative de contournement du système d'activation, d'extraction du contenu ou d'attaque informatique</li>
+        <li>Le harcèlement, la diffamation ou la diffusion de contenu illicite via les avis lecteurs</li>
+        <li>L'usurpation d'identité d'un autre utilisateur ou d'un membre de l'équipe</li>
+      </ul>
+      <p>Tout manquement peut entraîner la <strong>suspension immédiate</strong> du compte sans remboursement.</p>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">8</span> Disponibilité du service</h3>
+      <p>Nous mettons tout en œuvre pour assurer une disponibilité maximale du service. Toutefois, la plateforme peut être temporairement indisponible pour maintenance, mise à jour ou raison technique indépendante de notre volonté. Aucune indemnité ne pourra être réclamée en cas d'interruption ponctuelle.</p>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">9</span> Modification des conditions</h3>
+      <p>DÉKOD-IA se réserve le droit de modifier les présentes conditions à tout moment. Les modifications majeures sont notifiées par email aux utilisateurs au moins <strong>15 jours avant leur entrée en vigueur</strong>. La poursuite de l'utilisation du service après modification vaut acceptation des nouvelles conditions.</p>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">10</span> Droit applicable et litiges</h3>
+      <p>Les présentes conditions sont régies par le <strong>droit sénégalais</strong>. En cas de litige, une solution amiable sera systématiquement recherchée avant tout recours. À défaut, les tribunaux compétents de Dakar (Sénégal) seront seuls compétents.</p>
+    </div>
+  </section>
+
+  <!-- ============ CONFIDENTIALITÉ ============ -->
+  <section class="legal-section" id="tab-confidentialite">
+    <h2>Politique de confidentialité</h2>
+    <p>Tes données t'appartiennent. Voici précisément ce qu'on collecte, pourquoi, où c'est stocké et comment tu peux les supprimer.</p>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">1</span> Données collectées</h3>
+      <p>Lorsque tu utilises DÉKOD-IA, nous collectons uniquement les données nécessaires au fonctionnement du service :</p>
+      <ul>
+        <li><strong>Compte</strong> — prénom, email, mot de passe (chiffré, jamais stocké en clair)</li>
+        <li><strong>Profil partenaire</strong> (uniquement si tu deviens partenaire) — nom complet, téléphone, pays, code de parrainage</li>
+        <li><strong>Progression de lecture</strong> — chapitres marqués comme lus, dates</li>
+        <li><strong>Achat</strong> — prix payé, date d'activation, clé utilisée</li>
+        <li><strong>Avis lecteur</strong> — note et commentaire (visibles publiquement avec ton prénom et un email partiellement masqué)</li>
+        <li><strong>Photo de profil</strong> — uniquement si tu en uploades une</li>
+        <li><strong>Visites partenaires</strong> — un identifiant anonyme local stocké dans ton navigateur, pour éviter de compter plusieurs fois le même visiteur. <strong>Aucune adresse IP, aucune empreinte de navigateur</strong>.</li>
+      </ul>
+      <div class="legal-callout">
+        <p>Nous ne collectons <strong>aucune donnée bancaire</strong>. Tous les paiements transitent par CinetPay, qui dispose de ses propres conditions et certifications de sécurité.</p>
+      </div>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">2</span> Pourquoi on collecte ces données</h3>
+      <ul>
+        <li><strong>Te donner accès au guide</strong> et te reconnaître entre deux sessions</li>
+        <li><strong>Sauvegarder ta progression</strong> pour que tu retrouves où tu en étais</li>
+        <li><strong>Calculer les commissions partenaires</strong> de manière équitable et traçable</li>
+        <li><strong>Te contacter</strong> si nécessaire (problème technique, nouveau contenu majeur)</li>
+        <li><strong>Améliorer le service</strong> via les avis lecteurs</li>
+      </ul>
+      <p>Nous n'utilisons <strong>jamais</strong> tes données pour de la publicité, ni ne les vendons à des tiers.</p>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">3</span> Où sont stockées tes données</h3>
+      <p>Tes données sont hébergées sur <strong>Supabase</strong> (infrastructure Postgres sécurisée, serveurs en Europe). Les fichiers (photos de profil) sont stockés via Supabase Storage avec accès restreint.</p>
+      <p>L'application elle-même est hébergée sur <strong>Netlify</strong>. Les communications entre ton navigateur et nos serveurs sont chiffrées via HTTPS.</p>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">4</span> Cookies et traceurs</h3>
+      <p>DÉKOD-IA <strong>n'utilise pas de cookies de tracking ou de publicité</strong>. Aucun Google Analytics, Facebook Pixel ou outil similaire.</p>
+      <p>Nous utilisons uniquement :</p>
+      <ul>
+        <li>Un <strong>cookie de session</strong> pour te garder connecté entre deux visites (durée : jusqu'à déconnexion)</li>
+        <li>Un <strong>identifiant local</strong> (localStorage) pour mémoriser le code partenaire qui t'a parrainé, le temps que tu finalises ton inscription</li>
+      </ul>
+      <p>Ces deux éléments sont <strong>strictement nécessaires</strong> au fonctionnement du service et ne nécessitent pas de bandeau de consentement selon la réglementation en vigueur.</p>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">5</span> Tes droits</h3>
+      <p>Conformément au RGPD et aux lois applicables au Sénégal sur la protection des données personnelles, tu disposes des droits suivants :</p>
+      <ul>
+        <li><strong>Accès</strong> — obtenir une copie de toutes les données que nous détenons sur toi</li>
+        <li><strong>Rectification</strong> — corriger toute information inexacte</li>
+        <li><strong>Suppression</strong> — demander l'effacement de ton compte et de toutes tes données</li>
+        <li><strong>Portabilité</strong> — récupérer tes données dans un format lisible</li>
+        <li><strong>Opposition</strong> — refuser certains traitements</li>
+      </ul>
+      <p>Pour exercer ces droits, écris-nous à <a href="mailto:contact@dekod-ia.com">contact@dekod-ia.com</a>. Nous répondons sous <strong>30 jours maximum</strong>.</p>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">6</span> Durée de conservation</h3>
+      <ul>
+        <li><strong>Compte actif</strong> — tant que tu utilises la plateforme</li>
+        <li><strong>Compte inactif depuis 5 ans</strong> — anonymisation automatique des données personnelles (le compte est conservé pour la traçabilité comptable, mais sans email ni nom)</li>
+        <li><strong>Demande de suppression</strong> — effacement sous 30 jours</li>
+        <li><strong>Données comptables</strong> (achats, commissions) — 10 ans, conformément aux obligations légales</li>
+      </ul>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">7</span> Sécurité</h3>
+      <p>Nous prenons la sécurité au sérieux :</p>
+      <ul>
+        <li>Mots de passe stockés sous forme de hash (bcrypt), <strong>jamais en clair</strong></li>
+        <li>Communications HTTPS uniquement</li>
+        <li>Accès aux données restreint par <strong>Row Level Security</strong> (chaque utilisateur ne peut voir que ses propres données)</li>
+        <li>Sauvegardes automatiques quotidiennes</li>
+      </ul>
+      <p>En cas de violation de données, nous notifierons les utilisateurs concernés <strong>dans les 72 heures</strong> conformément au RGPD.</p>
+    </div>
+  </section>
+
+  <!-- ============ MENTIONS LÉGALES ============ -->
+  <section class="legal-section" id="tab-mentions">
+    <h2>Mentions légales</h2>
+    <p>Informations légales sur l'éditeur, l'hébergement et les contacts officiels.</p>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">1</span> Éditeur du site</h3>
+      <p><strong>DÉKOD-IA</strong> — projet édité à titre personnel.</p>
+      <p>
+        <strong>Auteur et fondateur :</strong> Abdoul Aziz BAH<br>
+        <strong>Pays :</strong> Sénégal<br>
+        <strong>Email de contact :</strong> <a href="mailto:contact@dekod-ia.com">contact@dekod-ia.com</a>
+      </p>
+      <p>Pour toute question concernant le contenu, les conditions d'utilisation, le programme partenaire ou les données personnelles, l'email ci-dessus est l'unique point de contact officiel.</p>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">2</span> Hébergement</h3>
+      <p>
+        <strong>Frontend :</strong> Netlify, Inc. — 512 2nd Street, Suite 200, San Francisco, CA 94107, États-Unis. <a href="https://www.netlify.com" target="_blank" rel="noopener">netlify.com</a><br>
+        <strong>Backend & base de données :</strong> Supabase Inc. — 970 Toa Payoh North #07-04, Singapore 318992. <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a><br>
+        <strong>Paiement :</strong> CinetPay — Côte d'Ivoire, Plateau, 04 BP 2456 Abidjan 04. <a href="https://cinetpay.com" target="_blank" rel="noopener">cinetpay.com</a>
+      </p>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">3</span> Propriété de la marque</h3>
+      <p>Le nom <strong>DÉKOD-IA</strong>, le logo et l'identité visuelle associée sont la propriété d'Abdoul Aziz BAH. Toute utilisation à des fins commerciales sans autorisation écrite préalable est interdite.</p>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">4</span> Liens vers des sites tiers</h3>
+      <p>Le site peut contenir des liens vers des sites externes (Netlify, Supabase, CinetPay, GitHub, documentation Anthropic, etc.). DÉKOD-IA n'est pas responsable du contenu, des politiques de confidentialité ou des pratiques de ces sites tiers.</p>
+    </div>
+
+    <div class="legal-block">
+      <h3><span class="h3-num">5</span> Crédits</h3>
+      <ul>
+        <li><strong>Polices :</strong> Inter et Barlow Condensed via Google Fonts</li>
+        <li><strong>Icônes :</strong> Lucide Icons (open source, MIT)</li>
+        <li><strong>Outil de développement :</strong> Claude Code par Anthropic</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="legal-contact-card">
+    <h3>Une question ?</h3>
+    <p>Tu trouves une formulation floue, tu veux exercer un droit, tu as une suggestion ?</p>
+    <a href="mailto:contact@dekod-ia.com">
+      <i data-lucide="mail"></i> contact@dekod-ia.com
+    </a>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>
+  lucide.createIcons();
+
+  // Onglets
+  const tabs = document.querySelectorAll('.legal-tab');
+  const sections = document.querySelectorAll('.legal-section');
+
+  function activateTab(tabId) {
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
+    sections.forEach(s => s.classList.toggle('active', s.id === 'tab-' + tabId));
+    // Mémorise dans l'URL pour partage direct
+    history.replaceState(null, '', '#' + tabId);
+    // Scroll vers le haut du contenu
+    window.scrollTo({ top: document.querySelector('.legal-tabs').offsetTop - 90, behavior: 'smooth' });
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => activateTab(tab.dataset.tab));
+  });
+
+  // Si l'URL contient un hash, ouvrir l'onglet correspondant au chargement
+  const initial = (location.hash || '').replace('#', '');
+  if (['cgu', 'confidentialite', 'mentions'].includes(initial)) {
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === initial));
+    sections.forEach(s => s.classList.toggle('active', s.id === 'tab-' + initial));
+  }
+</script>
+
+</body>
+</html>

@@ -11,13 +11,18 @@
   padding: 0 28px;
   z-index: 100;
 }
-.part-logo {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 700;
-  font-size: 20px;
-  color: var(--color-white);
+.part-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0;
 }
-.part-logo span { color: var(--color-red); }
+.part-logo {
+  display: flex;
+  align-items: center;
+}
+.part-logo .logo-img {
+  height: 24px;
+}
 .part-badge {
   font-size: 11px;
   font-weight: 600;
@@ -36,8 +41,11 @@
   font-size: 13px;
   color: var(--color-text-muted);
   transition: color 0.15s;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
 }
-.part-signout:hover { color: var(--color-white); }
+.part-signout:hover { color: var(--color-white); border-color: var(--color-border); }
 .part-signout svg { width: 15px; height: 15px; }
 
 .part-main {
@@ -53,9 +61,9 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 10px;
-  padding: 36px;
+  padding: 28px 28px;
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 .code-card.skeleton { min-height: 160px; }
 .code-label {
@@ -95,7 +103,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 .part-stat {
   background: var(--color-surface);
@@ -130,7 +138,16 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 24px;
+}
+.ventes-header {
+  padding: 16px 20px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.ventes-header .code-label {
+  margin-bottom: 14px;
 }
 .ventes-wrap table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .ventes-wrap thead th {
@@ -142,6 +159,7 @@
   letter-spacing: 0.5px;
   color: var(--color-text-muted);
   border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
 }
 .ventes-wrap tbody tr { border-bottom: 1px solid var(--color-border); }
 .ventes-wrap tbody tr:last-child { border-bottom: none; }
@@ -154,6 +172,7 @@
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 4px;
+  white-space: nowrap;
 }
 .badge-attente { background: rgba(234,179,8,0.12); color: #eab308; }
 .badge-paye    { background: rgba(34,197,94,0.12); color: #22c55e; }
@@ -211,11 +230,78 @@
 .btn-table-toggle:hover { color: var(--color-white); border-color: var(--color-text-muted); }
 .btn-table-toggle svg { width: 13px; height: 13px; }
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .part-stats { grid-template-columns: repeat(2, 1fr); }
-  .part-main  { padding: 20px 16px; }
-  .code-value { font-size: 36px; }
+  .part-main { padding: 28px 16px 60px; }
+  .code-card { padding: 24px 20px; }
+  .code-value { font-size: 38px; letter-spacing: 2px; }
+  .part-stats { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .part-stat { padding: 16px; }
 }
-@media (max-width: 480px) {
-  .part-stats { grid-template-columns: 1fr 1fr; }
+
+@media (max-width: 600px) {
+  .part-main { padding: 20px 14px 60px; }
+  .part-header { padding: 0 16px; }
+  .code-card { padding: 20px 16px; }
+  .code-value { font-size: 32px; letter-spacing: 1px; }
+  .part-stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .part-stat { padding: 14px 12px; }
+  .part-stat-value { font-size: 26px; }
+
+  /* Lien affiliation : word-break pour ne pas déborder */
+  code { word-break: break-all; font-size: 12px !important; }
+
+  /* ── TABLES → CARDS sur mobile ── */
+  /* On cache le thead, chaque ligne devient une carte */
+  .ventes-wrap table thead { display: none; }
+
+  .ventes-wrap table tbody tr {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .ventes-wrap table tbody tr:last-child { border-bottom: none; }
+
+  .ventes-wrap table tbody td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 5px 0;
+    border: none;
+    font-size: 13px;
+    color: var(--color-text-soft);
+    min-height: 0;
+  }
+
+  /* Label à gauche via data-label */
+  .ventes-wrap table tbody td::before {
+    content: attr(data-label);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 80px;
+    padding-top: 2px;
+  }
+
+  /* Valeur à droite */
+  .ventes-wrap table tbody td > * { text-align: right; }
+
+  /* Séparateur visuel entre chaque client/inscrit */
+  .ventes-wrap table tbody tr:not(:last-child) {
+    border-bottom: 1px solid rgba(42,42,42,0.9);
+  }
+
+  /* Status badge alignment on mobile */
+  .badge-statut { margin-left: auto; }
+
+  /* Header : masquer texte déco */
+  .part-signout span { display: none; }
+  .part-signout { padding: 7px; }
 }

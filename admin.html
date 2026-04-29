@@ -14,7 +14,7 @@
 
 <header class="admin-header">
   <div class="admin-logo">
-    DÉKOD<span>-IA</span>
+    <img src="assets/images/Logo.png" alt="DÉKOD-IA" class="logo-img">
     <span class="admin-badge">Admin</span>
   </div>
   <button class="admin-signout" onclick="signOut()">
@@ -65,11 +65,29 @@
   <!-- Clés d'activation -->
   <div class="section-header">
     <p class="section-title">Clés d'activation</p>
-    <div class="cles-gen-row">
-      <input type="number" id="cles-qty" min="1" max="100" placeholder="Quantité" class="config-input" style="width:120px">
-      <button id="btn-generer-cles" class="btn-config-save" onclick="genererCles()">
-        <i data-lucide="plus"></i> Générer
-      </button>
+    <span class="section-count" id="cles-count"></span>
+  </div>
+
+  <!-- Formulaire création clé -->
+  <div class="config-card" style="margin-bottom:16px;">
+    <div class="config-edit" style="width:100%">
+      <div class="config-card-title">Créer une clé</div>
+      <div class="cles-gen-row" style="flex-wrap:wrap;gap:10px;align-items:center;">
+        <input type="text" id="cle-code-custom" placeholder="Code perso (ex: DEKOD-XXXX-XXXX) — vide = auto" class="config-input" style="flex:2;min-width:220px">
+        <input type="number" id="cles-qty" min="1" max="100" value="1" placeholder="Quantité" class="config-input" style="width:110px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--color-text-soft);font-size:13px;white-space:nowrap;" title="Clé payante = marquée 'paid' à l'activation, non rendu publique">
+          <input type="checkbox" id="cle-payante" style="accent-color:var(--color-red);width:15px;height:15px;" onchange="onPayanteChange(this.checked)">
+          Payante
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--color-text-soft);font-size:13px;white-space:nowrap;" title="Visible et copiable sur la page d'activation (uniquement pour les clés gratuites)">
+          <input type="checkbox" id="cle-publique" style="accent-color:var(--color-red);width:15px;height:15px;">
+          Publique
+        </label>
+        <button id="btn-generer-cles" class="btn-config-save" onclick="genererCles()">
+          <i data-lucide="plus"></i> Créer
+        </button>
+      </div>
+      <p class="config-note" style="margin-top:8px;">Code vide = auto · <strong style="color:var(--color-white)">Payante</strong> = accès marqué 'acheté' au prix actuel, impossible à rendre publique · <strong style="color:var(--color-white)">Publique</strong> = visible sur la page d'activation (gratuit uniquement)</p>
     </div>
   </div>
 
@@ -78,11 +96,13 @@
       <thead>
         <tr>
           <th>#</th>
-          <th>Clé (masquée)</th>
+          <th>Code complet</th>
+          <th>Type</th>
+          <th>Visibilité</th>
           <th>Statut</th>
           <th>Utilisée par</th>
           <th>Date activation</th>
-          <th>Prix payé</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody id="cles-tbody">
@@ -90,9 +110,10 @@
           <td><div class="skeleton skeleton-cell tiny"></div></td>
           <td><div class="skeleton skeleton-cell"></div></td>
           <td><div class="skeleton skeleton-cell short"></div></td>
+          <td><div class="skeleton skeleton-cell short"></div></td>
           <td><div class="skeleton skeleton-cell"></div></td>
           <td><div class="skeleton skeleton-cell short"></div></td>
-          <td><div class="skeleton skeleton-cell short"></div></td>
+          <td><div class="skeleton skeleton-cell tiny"></div></td>
         </tr>
       </tbody>
     </table>

@@ -15,6 +15,13 @@ exports.handler = async (event) => {
     return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Non authentifié.' }) };
   }
 
+  // Garde-fou : variables d'environnement Netlify obligatoires
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({
+      error: "Configuration serveur manquante. Variables SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY à ajouter dans Netlify → Environment variables."
+    }) };
+  }
+
   const sb = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -35,11 +42,6 @@ exports.handler = async (event) => {
   const code = (body.code || '').trim().toUpperCase();
   if (!code) {
     return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Clé manquante.' }) };
-  }
-
-  // ── 0. Garde-fou : la service-role key DOIT être configurée ──────────────────
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.SUPABASE_URL) {
-    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: 'Configuration serveur manquante (SUPABASE_SERVICE_ROLE_KEY).' }) };
   }
 
   // ── 1. Vérifier que la clé est disponible ────────────────────────────────────

@@ -20,7 +20,16 @@ async function initDashboard() {
   if (!profile?.onboarding_done) { window.location.href = 'onboarding.html'; return; }
 
   const prenom = profile?.prenom || '';
-  document.getElementById('user-prenom').textContent = prenom ? `Bonjour, ${prenom}` : '';
+  // Header prénom
+  const prenomEl = document.getElementById('user-prenom');
+  if (prenomEl) prenomEl.textContent = prenom;
+  // Bloc accueil
+  const welcomeEl = document.getElementById('dash-welcome');
+  const welcomeName = document.getElementById('dash-welcome-name');
+  if (welcomeEl && prenom) {
+    welcomeName.innerHTML = `${prenom}, <em>continue sur ta lancée.</em>`;
+    welcomeEl.style.display = 'block';
+  }
   renderAvatar(profile?.avatar_url, session.user.id);
 
   // Charger parties + chapitres
@@ -58,7 +67,67 @@ async function initDashboard() {
 
   renderProgress(totalLus, totalChapitres, pct, nextChap);
   renderParties(parties || [], chapitres || [], lusSet);
+  await renderAccessBadge(session.user.id);
   await initCommentaire(session.user.id, guideId, totalLus, totalChapitres);
+
+  // Arrivée depuis la fin du guide → scroller vers la section avis
+  if (window.location.hash === '#commentaire-section') {
+    const section = document.getElementById('commentaire-section');
+    if (section) {
+      setTimeout(() => {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 200);
+    }
+  }
+}
+
+// Affiche un badge avec le type d'accès + prix payé (transparence acheteur)
+async function renderAccessBadge(userId) {
+  const el = document.getElementById('dash-access-info');
+  if (!el) return;
+
+  // Charger l'accès actif + email pour retrouver la clé
+  const [{ data: acces }, { data: profile }] = await Promise.all([
+    sb.from('acces').select('type, created_at').eq('user_id', userId).eq('actif', true).maybeSingle(),
+    sb.from('profiles').select('email, ref_code').eq('id', userId).single()
+  ]);
+
+  if (!acces) return;
+
+  // Si paid → retrouver le prix via la clé utilisée
+  let prixAchat = 0;
+  if (acces.type === 'paid' && profile?.email) {
+    const { data: cle } = await sb
+      .from('cles')
+      .select('prix_achat, code, active_at')
+      .eq('utilise_par', profile.email)
+      .eq('statut', 'used')
+      .order('active_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    prixAchat = cle?.prix_achat || 0;
+  }
+
+  if (acces.type === 'paid' && prixAchat > 0) {
+    el.innerHTML = `
+      <span class="access-badge paid">
+        <i data-lucide="check-circle"></i>
+        Accès complet · Acheté ${prixAchat.toLocaleString('fr-FR')} FCFA
+      </span>
+      ${profile?.ref_code ? `<span class="access-badge ref">
+        <i data-lucide="users"></i>
+        Inscrit via le partenaire <strong>${profile.ref_code}</strong>
+      </span>` : ''}
+    `;
+  } else {
+    el.innerHTML = `
+      <span class="access-badge founder">
+        <i data-lucide="sparkles"></i>
+        Accès fondateur — gratuit à vie
+      </span>
+    `;
+  }
+  lucide.createIcons();
 }
 
 function renderProgress(lus, total, pct, nextChap) {

@@ -136,7 +136,15 @@ function renderUsers(users) {
 
 async function setAccesActif(userId, actif) {
   const action = actif ? 'activer' : 'désactiver';
-  if (!confirm(`Voulez-vous ${action} l'accès de cet utilisateur ?`)) return;
+  const ok = await confirmModal({
+    title: actif ? 'Activer cet accès' : 'Désactiver cet accès',
+    message: `Voulez-vous vraiment ${action} l'accès de cet utilisateur au guide ?`,
+    confirmLabel: actif ? 'Activer' : 'Désactiver',
+    cancelLabel: 'Annuler',
+    danger: !actif,
+    icon: actif ? 'check-circle' : 'x-circle'
+  });
+  if (!ok) return;
   const { error } = await sb.from('acces').update({ actif }).eq('user_id', userId);
   if (!error) {
     toast(actif ? 'Accès activé.' : 'Accès désactivé.', 'success');
@@ -160,97 +168,210 @@ function filterUsers(query) {
 async function loadCles() {
   const { data: cles } = await sb
     .from('cles')
-    .select('id, numero_interne, code, statut, utilise_par, active_at, prix_achat')
-    .order('numero_interne', { ascending: false });
+    .select('id, numero_interne, code, statut, is_fondateur, prix_achat, utilise_par, active_at')
+    .order('created_at', { ascending: false });
 
   renderCles(cles || []);
 }
 
 function renderCles(cles) {
-  const tbody = document.getElementById('cles-tbody');
+  const tbody  = document.getElementById('cles-tbody');
+  const countEl = document.getElementById('cles-count');
   if (!tbody) return;
 
-  if (cles.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--color-text-muted);padding:32px">Aucune clé générée.</td></tr>`;
+  const total     = cles.length;
+  const payantes  = cles.filter(c => (c.prix_achat || 0) > 0).length;
+  const publiques = cles.filter(c => c.is_fondateur).length;
+  const utilisees = cles.filter(c => c.statut === 'used').length;
+  if (countEl) countEl.textContent = `${total} clé(s) · ${payantes} payante(s) · ${publiques} publique(s) · ${utilisees} utilisée(s)`;
+
+  if (total === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--color-text-muted);padding:32px">Aucune clé créée.</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = buildToggleRows(cles, c => {
-    const masked = maskKey(c.code);
+  tbody.innerHTML = buildToggleRows(cles, (c, idx) => {
+    const disponible = c.statut === 'unused';
+    const publique   = c.is_fondateur;
+    const payante    = (c.prix_achat || 0) > 0;
+
+    // Badge type : payante ou gratuite
+    const typeBadge = payante
+      ? `<span class="badge-actif" style="background:rgba(232,0,29,0.1);color:var(--color-red);border:1px solid rgba(232,0,29,0.25);">
+           <i data-lucide="credit-card"></i> ${c.prix_achat.toLocaleString('fr-FR')} FCFA
+         </span>`
+      : `<span class="badge-actif" style="background:rgba(34,197,94,0.08);color:#22c55e;border:1px solid rgba(34,197,94,0.2);">
+           <i data-lucide="gift"></i> Gratuite
+         </span>`;
+
+    // Visibilité : désactivée pour les clés payantes
+    const visibiliteBtn = payante
+      ? `<span class="badge-actif badge-revoke" style="opacity:0.45;cursor:not-allowed;font-size:11px;padding:4px 10px;" title="Une clé payante ne peut pas être publique">
+           <i data-lucide="lock"></i> Privée
+         </span>`
+      : publique
+        ? `<button class="btn-validate" style="font-size:11px;padding:4px 10px;" onclick="togglePublique('${c.id}', true)" title="Retirer de la liste publique">
+             <i data-lucide="eye"></i> Publique
+           </button>`
+        : `<button class="btn-revoke" style="font-size:11px;padding:4px 10px;opacity:0.6;" onclick="togglePublique('${c.id}', false)" title="Rendre publique">
+             <i data-lucide="eye-off"></i> Privée
+           </button>`;
+
     return `<tr>
-      <td class="muted" style="font-family:monospace">#${String(c.numero_interne).padStart(3, '0')}</td>
+      <td class="muted" style="font-family:monospace">${idx + 1}</td>
       <td>
         <div style="display:flex;align-items:center;gap:8px;">
-          <code style="font-family:monospace;font-size:12px;color:var(--color-text-soft)">${masked}</code>
-          ${c.statut === 'unused'
-            ? `<button class="btn-copy-key" title="Copier la clé" onclick="copierCle('${c.code}', this)"><i data-lucide="copy"></i></button>`
-            : ''}
+          <code style="font-family:monospace;font-size:12px;color:var(--color-text-soft);letter-spacing:0.5px">${c.code}</code>
+          <button class="btn-copy-key" title="Copier" onclick="copierCle('${c.code}', this)"><i data-lucide="copy"></i></button>
         </div>
       </td>
-      <td>${c.statut === 'unused'
+      <td>${typeBadge}</td>
+      <td>${visibiliteBtn}</td>
+      <td>${disponible
         ? '<span class="badge-actif"><i data-lucide="circle"></i> Disponible</span>'
         : '<span class="badge-actif badge-revoke"><i data-lucide="check-circle"></i> Utilisée</span>'}
       </td>
-      <td class="muted">${c.utilise_par || '—'}</td>
+      <td class="muted" style="font-size:12px">${c.utilise_par || '—'}</td>
       <td class="muted">${c.active_at ? formatDate(c.active_at) : '—'}</td>
-      <td class="muted">${c.prix_achat > 0 ? c.prix_achat + ' FCFA' : '—'}</td>
+      <td>
+        ${disponible
+          ? `<button class="btn-revoke" style="font-size:11px;padding:4px 10px;" onclick="supprimerCle('${c.id}')">
+               <i data-lucide="trash-2"></i> Supprimer
+             </button>`
+          : '—'}
+      </td>
     </tr>`;
-  }, 6);
+  }, 8);
   lucide.createIcons();
-}
-
-function maskKey(code) {
-  const parts = code.split('-');
-  if (parts.length < 2) return code.slice(0, -4) + '****';
-  const copy = [...parts];
-  copy[copy.length - 1] = '****';
-  return copy.join('-');
 }
 
 function copierCle(code, btn) {
   navigator.clipboard.writeText(code).then(() => {
     toast('Clé copiée !', 'success');
+    const orig = btn.innerHTML;
     btn.innerHTML = '<i data-lucide="check"></i>';
     lucide.createIcons();
-    setTimeout(() => {
-      btn.innerHTML = '<i data-lucide="copy"></i>';
-      lucide.createIcons();
-    }, 2000);
+    setTimeout(() => { btn.innerHTML = orig; lucide.createIcons(); }, 2000);
   });
 }
 
 function generateKeyCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  const seg = () => Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  return `DK-${seg()}-${seg()}-${seg()}`;
+  const seg   = () => Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  return `DK-${seg()}-${seg()}`;
+}
+
+// Quand "Payante" est cochée → forcer Publique à false et désactiver
+function onPayanteChange(isPayante) {
+  const chkPublique = document.getElementById('cle-publique');
+  if (!chkPublique) return;
+  if (isPayante) {
+    chkPublique.checked  = false;
+    chkPublique.disabled = true;
+  } else {
+    chkPublique.disabled = false;
+  }
 }
 
 async function genererCles() {
-  const qtyInput = document.getElementById('cles-qty');
-  const qty = parseInt(qtyInput?.value || '1', 10);
+  const codeInput  = document.getElementById('cle-code-custom');
+  const qtyInput   = document.getElementById('cles-qty');
+  const isPayante  = document.getElementById('cle-payante')?.checked || false;
+  const isPublic   = !isPayante && (document.getElementById('cle-publique')?.checked || false);
+
+  const codeCustom = codeInput?.value.trim().toUpperCase() || '';
+  const qty        = parseInt(qtyInput?.value || '1', 10);
+
   if (!qty || qty < 1 || qty > 100) {
     toast('Quantité invalide (1–100).', 'error');
     return;
   }
 
+  // Pour les clés payantes : récupérer le prix actuel depuis config
+  let prixAchat = 0;
+  if (isPayante) {
+    const { data: cfg } = await sb.from('config').select('prix_actuel').limit(1).single();
+    prixAchat = cfg?.prix_actuel || 0;
+    if (!prixAchat || prixAchat < 600) {
+      toast('Définis d\'abord un prix valide dans la section Configuration (min 600 FCFA).', 'error');
+      return;
+    }
+  }
+
   const btn = document.getElementById('btn-generer-cles');
   btn.disabled = true;
-  btn.textContent = 'Génération…';
+  btn.innerHTML = '<i data-lucide="loader"></i> Création…';
+  lucide.createIcons();
 
-  const rows = Array.from({ length: qty }, () => ({ code: generateKeyCode() }));
+  // Si code perso fourni → 1 seule clé avec ce code exact
+  // Si code vide → qty clés auto-générées
+  let rows;
+  if (codeCustom) {
+    rows = [{ code: codeCustom, statut: 'unused', is_fondateur: isPublic, prix_achat: prixAchat }];
+  } else {
+    rows = Array.from({ length: qty }, () => ({
+      code: generateKeyCode(),
+      statut: 'unused',
+      is_fondateur: isPublic,
+      prix_achat: prixAchat
+    }));
+  }
 
   const { error } = await sb.from('cles').insert(rows);
   if (error) {
-    toast('Erreur lors de la génération.', 'error');
+    toast('Erreur : ' + (error.message || 'code déjà existant ?'), 'error');
   } else {
-    toast(`${qty} clé(s) générée(s).`, 'success');
-    qtyInput.value = '';
+    const label = isPayante ? `payante(s) à ${prixAchat.toLocaleString('fr-FR')} FCFA` : isPublic ? 'publique(s) gratuite(s)' : 'privée(s) gratuite(s)';
+    toast(`${rows.length} clé(s) créée(s) — ${label}.`, 'success');
+    if (codeInput) codeInput.value = '';
+    qtyInput.value = '1';
+    document.getElementById('cle-payante').checked  = false;
+    document.getElementById('cle-publique').checked = false;
+    document.getElementById('cle-publique').disabled = false;
     await loadCles();
   }
 
   btn.disabled = false;
-  btn.innerHTML = '<i data-lucide="plus"></i> Générer';
+  btn.innerHTML = '<i data-lucide="plus"></i> Créer';
   lucide.createIcons();
+}
+
+async function supprimerCle(id) {
+  const ok = await confirmModal({
+    title: 'Supprimer cette clé ?',
+    message: 'Cette action est irréversible. La clé sera définitivement retirée de la base.',
+    confirmLabel: 'Supprimer',
+    cancelLabel: 'Annuler',
+    danger: true,
+    icon: 'trash-2'
+  });
+  if (!ok) return;
+  const { error } = await sb.from('cles').delete().eq('id', id).eq('statut', 'unused');
+  if (error) {
+    toast('Erreur suppression.', 'error');
+  } else {
+    toast('Clé supprimée.', 'success');
+    await loadCles();
+  }
+}
+
+async function togglePublique(id, estPublique) {
+  // Vérifier que la clé n'est pas payante avant de la rendre publique
+  if (!estPublique) {
+    // On veut la rendre publique → vérifier prix_achat
+    const { data: cle } = await sb.from('cles').select('prix_achat').eq('id', id).single();
+    if (cle?.prix_achat > 0) {
+      toast('Impossible : une clé payante ne peut pas être rendue publique.', 'error');
+      return;
+    }
+  }
+  // estPublique = valeur ACTUELLE → on inverse
+  const { error } = await sb.from('cles').update({ is_fondateur: !estPublique }).eq('id', id);
+  if (error) {
+    toast('Erreur.', 'error');
+  } else {
+    await loadCles();
+  }
 }
 
 // ── Prix & Config ─────────────────────────────────────────────────────────────
@@ -558,7 +679,15 @@ async function validerPartenaire(id) {
 }
 
 async function rejeterPartenaire(id) {
-  if (!confirm('Rejeter ce partenaire ?')) return;
+  const ok = await confirmModal({
+    title: 'Rejeter ce partenaire ?',
+    message: 'Sa demande sera marquée comme rejetée. Il pourra recevoir une notification mais ne pourra plus accéder au programme.',
+    confirmLabel: 'Rejeter',
+    cancelLabel: 'Annuler',
+    danger: true,
+    icon: 'user-x'
+  });
+  if (!ok) return;
   const { error } = await sb.from('partenaires').update({ statut: 'rejeté' }).eq('id', id);
   if (!error) {
     toast('Partenaire rejeté.', 'success');
